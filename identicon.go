@@ -151,13 +151,13 @@ func (ic *Identicon) mirror() {
 	for i := 0; i <= 1; i++ {
 		x := 4 - i
 		for y := 0; y < 5; y++ {
-			// fmt.Println("###", x, y, "|", i, y, ":", ic.Tiles[i][y])
 			ic.Tiles[x][y] = ic.Tiles[i][y]
+			// fmt.Println("###", x, y, "|", i, y, ":", ic.Tiles[i][y])
 		}
 	}
 }
 
-// MD5 returns MD5 byle slice of given input string
+// MD5 returns MD5 hash of given input string as byte slice
 func MD5(text string) ([]byte, error) {
 	hasher := md5.New()
 	_, err := hasher.Write([]byte(text))
@@ -170,12 +170,14 @@ func MD5(text string) ([]byte, error) {
 
 func posToXY(pos int8) (x, y int) {
 
+	// The two leftmost cols
 	if pos < 10 {
 		if pos%2 != 0 {
 			x = 1
 		}
 		y = int(float32(pos) / 2.0)
 	} else {
+		// Middle col
 		x = 2
 		y = int(float32(pos) / 3.0)
 	}
