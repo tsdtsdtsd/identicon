@@ -2,6 +2,7 @@ package identicon
 
 import (
 	"crypto/md5"
+	"encoding/hex"
 	"fmt"
 	"image"
 	"image/color"
@@ -11,6 +12,14 @@ import (
 const (
 	imgWidth  = 100
 	imgHeight = 100
+
+	tilesPerDimension = 5
+)
+
+var (
+	backgroundColor = rgb(220, 220, 220)
+
+	debug = false
 )
 
 // Identicon defines an identicon
@@ -23,6 +32,8 @@ type Identicon struct {
 
 // New returns a new identicon based on given ID string
 func New(ID string) (*Identicon, error) {
+
+	// A valid hash is mandatory
 	hash, err := MD5(ID)
 	if err != nil {
 		return nil, err
@@ -35,27 +46,30 @@ func New(ID string) (*Identicon, error) {
 }
 
 // GenerateImage returns an generated Image representation of the identicon
-func (ic *Identicon) GenerateImage() *image.Image {
+func (ic *Identicon) GenerateImage() image.Image {
 
-	ic.createTiles()
-	// ic.DebugPrintTiles()
-
-	// Color
-	colorIdx := int(ic.Hash[15])
-	if colorIdx > 215 {
-		colorIdx = 20
+	ic.populateTiles()
+	ic.defineColor()
+	if debug {
+		ic.DebugPrintTiles()
 	}
 
-	ic.Color = palette.WebSafe[colorIdx]
+	bounds := image.Rectangle{
+		Min: image.Point{0, 0},
+		Max: image.Point{imgWidth, imgHeight},
+	}
 
-	// New image
-	bounds := image.Rectangle{Min: image.Point{0, 0}, Max: image.Point{imgWidth, imgHeight}}
-	palette := color.Palette{ic.Color, rgb(240, 240, 240)}
-	img := image.NewPaletted(bounds, palette)
+	img := image.NewPaletted(
+		bounds,
+		color.Palette{
+			backgroundColor,
+			ic.Color,
+		},
+	)
 
-	// Draw
-	for xTile := 0; xTile < 5; xTile++ {
-		for yTile := 0; yTile < 5; yTile++ {
+	// Iterate tiles and draw
+	for xTile := 0; xTile < tilesPerDimension; xTile++ {
+		for yTile := 0; yTile < tilesPerDimension; yTile++ {
 			if ic.Tiles[xTile][yTile] {
 				ic.drawTile(img, xTile, yTile)
 			}
@@ -63,23 +77,22 @@ func (ic *Identicon) GenerateImage() *image.Image {
 		}
 	}
 
-	i := img.SubImage(bounds)
-	return &i
+	return img.SubImage(bounds)
 }
 
-func (ic *Identicon) drawTile(img *image.Paletted, xTile, yTile int) *image.Paletted {
+func (ic *Identicon) drawTile(img *image.Paletted, xTile, yTile int) {
 
-	xStart := (xTile * (imgWidth / 5))
+	xStart := (xTile * (imgWidth / tilesPerDimension))
 	if xStart < 0 {
 		xStart = 0
 	}
-	xEnd := xStart + (imgWidth / 5) - 1
+	xEnd := xStart + (imgWidth / tilesPerDimension) - 1
 
-	yStart := (yTile * (imgHeight / 5))
+	yStart := (yTile * (imgHeight / tilesPerDimension))
 	if yStart < 0 {
 		yStart = 0
 	}
-	yEnd := yStart + (imgHeight / 5) - 1
+	yEnd := yStart + (imgHeight / tilesPerDimension) - 1
 
 	// fmt.Println("x", xStart, xEnd)
 	// fmt.Println("y", yStart, yEnd)
@@ -89,20 +102,19 @@ func (ic *Identicon) drawTile(img *image.Paletted, xTile, yTile int) *image.Pale
 			img.SetColorIndex(x, y, 1)
 		}
 	}
-
-	return img
 }
 
-func (ic *Identicon) createTiles() {
+func (ic *Identicon) populateTiles() {
 
-	tiles := make([][]bool, 5)
+	tiles := make([][]bool, tilesPerDimension)
 	for i := range tiles {
-		tiles[i] = make([]bool, 5)
+		tiles[i] = make([]bool, tilesPerDimension)
 	}
 
 	ic.Tiles = tiles
 
-	// First 15 bytes of hash define pixels:
+	// Per image, we have 5x5 tiles available.
+	// First 15 bytes of hash define tiles:
 	//   - first 10 are the two leftmost cols and get mirrored to the rightmost cols
 	//   - next 5 for the middle col
 	// Last byte for the pixel color
@@ -122,37 +134,55 @@ func (ic *Identicon) createTiles() {
 	ic.mirror()
 }
 
-// DebugPrintTiles prints the tiles at positions x,y
-func (ic *Identicon) DebugPrintTiles() {
-	for x := range ic.Tiles {
-		for y, v := range ic.Tiles[x] {
-			fmt.Printf("%d,%d : %v\n", x, y, v)
+func (ic *Identicon) calcTile(pos int8, b byte) {
+
+	lever := (int(b) & 2) > 0
+	x, y := posToXY(pos)
+
+	ic.Tiles[x][y] = lever
+}
+
+func (ic *Identicon) mirror() {
+
+	for x := 0; x <= 1; x++ {
+
+		xi := tilesPerDimension - 1 - x // mirror offset for cols
+
+		for y := 0; y < tilesPerDimension; y++ {
+
+			ic.Tiles[xi][y] = ic.Tiles[x][y]
+
+			if debug {
+				fmt.Printf("Mirroring %d:%d to %d:%d (%v)\n", x, y, xi, y, ic.Tiles[x][y])
+			}
 		}
 	}
 }
 
-func (ic *Identicon) calcTile(pos int8, b byte) {
+func (ic *Identicon) defineColor() {
 
-	var lever = float32(b)
-	for lever >= 2 {
-		lever = lever / 3
+	colorIdx := int(ic.Hash[15])
+
+	// @todo need a custom palette
+
+	// Index out of range?
+	for colorIdx > len(palette.WebSafe)-1 {
+		colorIdx = colorIdx / 9 * 7
 	}
 
-	var value bool
-	if int8(lever) == 1 {
-		value = true
-	}
-
-	x, y := posToXY(pos)
-	ic.Tiles[x][y] = value
+	ic.Color = palette.WebSafe[colorIdx]
 }
 
-func (ic *Identicon) mirror() {
-	for i := 0; i <= 1; i++ {
-		x := 4 - i
-		for y := 0; y < 5; y++ {
-			ic.Tiles[x][y] = ic.Tiles[i][y]
-			// fmt.Println("###", x, y, "|", i, y, ":", ic.Tiles[i][y])
+// HashString returns hash value as string
+func (ic *Identicon) HashString() string {
+	return hex.EncodeToString(ic.Hash)
+}
+
+// DebugPrintTiles prints the tiles at positions x,y
+func (ic *Identicon) DebugPrintTiles() {
+	for x := range ic.Tiles {
+		for y, v := range ic.Tiles[x] {
+			fmt.Printf("Tile %d:%d = %v\n", x, y, v)
 		}
 	}
 }

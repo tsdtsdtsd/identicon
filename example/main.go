@@ -16,8 +16,10 @@ func main() {
 	}
 	defer fi.Close()
 
-	ic, _ := identicon.New("identicon.png")
+	ic, err := identicon.New("oh-hello@my-identicon.com")
+	if err != nil {
+		panic(err.Error())
+	}
 
-	// fmt.Println(hex.EncodeToString(ic.Hash))
-	png.Encode(fi, *ic.GenerateImage())
+	png.Encode(fi, ic.GenerateImage())
 }
