@@ -18,5 +18,3 @@ script:
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
-
-  545026a4-ad9d-4094-9777-0c356fc26cdb
