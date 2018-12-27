@@ -4,6 +4,7 @@
 
 [![Go Report Card][grc-image]][grc-url]
 [![Godoc][godoc-image]][godoc-url]
+[![codecov](https://codecov.io/gh/tsdtsdtsd/identicon/branch/master/graph/badge.svg)](https://codecov.io/gh/tsdtsdtsd/identicon)
 
 ![Example](example/identicon.png "Example")
 
