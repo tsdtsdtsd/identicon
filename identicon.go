@@ -17,7 +17,7 @@ const (
 )
 
 var (
-	backgroundColor = rgb(220, 220, 220)
+	backgroundColor = rgb(235, 235, 235)
 
 	debug = false
 )
