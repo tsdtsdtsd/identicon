@@ -16,7 +16,7 @@ func main() {
 	}
 	defer fi.Close()
 
-	ic, err := identicon.New("oh-hello@my-identicon.com")
+	ic, err := identicon.New("oh-hello@my-identicon.com", nil)
 	if err != nil {
 		panic(err.Error())
 	}
