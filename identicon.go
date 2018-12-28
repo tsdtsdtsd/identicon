@@ -18,24 +18,37 @@ const (
 )
 
 var (
-	backgroundColor = rgb(235, 235, 235)
-
-	debug = false
+	defaultBackgroundColor = RGB(235, 235, 235)
 )
 
 // Identicon defines an identicon
 type Identicon struct {
-	ID    string
-	Hash  []byte
-	Tiles [][]bool
-	Color color.Color
+	ID      string
+	Hash    []byte
+	Tiles   [][]bool
+	Color   color.Color
+	Options *Options
+}
+
+// Options controll some inner mechanics
+type Options struct {
+	BackgroundColor color.NRGBA
+	Debug           bool
 }
 
 // New returns a new identicon based on given ID string
-func New(ID string) (*Identicon, error) {
+func New(ID string, opts *Options) (*Identicon, error) {
+
+	if opts == nil {
+		opts = &Options{
+			BackgroundColor: defaultBackgroundColor,
+		}
+	}
+
 	return &Identicon{
-		ID:   ID,
-		Hash: MD5(ID),
+		ID:      ID,
+		Hash:    MD5(ID),
+		Options: opts,
 	}, nil
 }
 
@@ -44,7 +57,7 @@ func (ic *Identicon) GenerateImage() *image.RGBA {
 
 	ic.populateTiles()
 	ic.defineColor()
-	if debug {
+	if ic.Options.Debug {
 		ic.debugPrintTiles()
 	}
 
@@ -56,7 +69,7 @@ func (ic *Identicon) GenerateImage() *image.RGBA {
 	img := image.NewRGBA(bounds)
 
 	// Background fill
-	draw.Draw(img, img.Bounds(), &image.Uniform{backgroundColor}, image.ZP, draw.Src)
+	draw.Draw(img, img.Bounds(), &image.Uniform{ic.Options.BackgroundColor}, image.ZP, draw.Src)
 
 	// Iterate tiles and draw
 	for xTile := 0; xTile < tilesPerDimension; xTile++ {
@@ -134,7 +147,7 @@ func (ic *Identicon) mirror() {
 
 			ic.Tiles[xi][y] = ic.Tiles[x][y]
 
-			if debug {
+			if ic.Options.Debug {
 				fmt.Printf("Mirroring %d:%d to %d:%d (%v)\n", x, y, xi, y, ic.Tiles[x][y])
 			}
 		}
@@ -176,6 +189,11 @@ func MD5(text string) []byte {
 	return hasher.Sum(nil)
 }
 
+// RGB returns color.NRGBA struct for given red, green and blue values
+func RGB(r, g, b uint8) color.NRGBA {
+	return color.NRGBA{R: r, G: g, B: b, A: 255}
+}
+
 func posToXY(pos int8) (x, y int) {
 
 	// The two leftmost cols
@@ -191,8 +209,4 @@ func posToXY(pos int8) (x, y int) {
 	}
 
 	return
-}
-
-func rgb(r, g, b uint8) color.NRGBA {
-	return color.NRGBA{R: r, G: g, B: b, A: 255}
 }
