@@ -33,16 +33,9 @@ type Identicon struct {
 
 // New returns a new identicon based on given ID string
 func New(ID string) (*Identicon, error) {
-
-	// A valid hash is mandatory
-	hash, err := MD5(ID)
-	if err != nil {
-		return nil, err
-	}
-
 	return &Identicon{
 		ID:   ID,
-		Hash: hash,
+		Hash: MD5(ID),
 	}, nil
 }
 
