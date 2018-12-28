@@ -30,7 +30,7 @@ type Identicon struct {
 	Options *Options
 }
 
-// Options controll some inner mechanics
+// Options control some inner mechanics
 type Options struct {
 	BackgroundColor color.NRGBA
 	Debug           bool
