@@ -59,6 +59,34 @@ func TestGernerate(t *testing.T) {
 	if i > 0 {
 		t.Error("Generated image not identical to proof")
 	}
+}
+
+func TestColorPalette(t *testing.T) {
+	ic, _ := New(id)
+	ic.Hash = []byte{
+		byte(0),
+		byte(1),
+		byte(1),
+		byte(1),
+		byte(1),
+		byte(1),
+		byte(1),
+		byte(1),
+		byte(1),
+		byte(1),
+		byte(1),
+		byte(1),
+		byte(1),
+		byte(1),
+		byte(1),
+		byte(255), // Color byte may not overflow palette size of 215
+	}
+
+	generated := ic.GenerateImage()
+
+	if generated == nil {
+		t.Error("Generation for color palette test failed")
+	}
 
 }
 
