@@ -16,7 +16,7 @@ var (
 
 func TestNew(t *testing.T) {
 
-	ic, err := New(id)
+	ic, err := New(id, nil)
 	if ic == nil {
 		t.Error("New Identicon struct is nil")
 	}
@@ -34,7 +34,7 @@ func TestNew(t *testing.T) {
 }
 
 func TestGernerate(t *testing.T) {
-	ic, _ := New(id)
+	ic, _ := New(id, nil)
 	generated := ic.GenerateImage()
 
 	f, err := os.Open(id + ".png")
@@ -62,7 +62,7 @@ func TestGernerate(t *testing.T) {
 }
 
 func TestColorPalette(t *testing.T) {
-	ic, _ := New(id)
+	ic, _ := New(id, nil)
 	ic.Hash = []byte{
 		byte(0),
 		byte(1),
@@ -88,6 +88,15 @@ func TestColorPalette(t *testing.T) {
 		t.Error("Generation for color palette test failed")
 	}
 
+}
+
+func TestDebug(t *testing.T) {
+	ic, _ := New(id, &Options{Debug: true})
+	generated := ic.GenerateImage()
+
+	if generated == nil {
+		t.Error("Generation for debug test failed")
+	}
 }
 
 func FastCompare(img1, img2 *image.RGBA) (int64, error) {
