@@ -177,14 +177,10 @@ func (ic *Identicon) debugPrintTiles() {
 }
 
 // MD5 returns MD5 hash of given input string as byte slice
-func MD5(text string) ([]byte, error) {
+func MD5(text string) []byte {
 	hasher := md5.New()
-	_, err := hasher.Write([]byte(text))
-	if err != nil {
-		return []byte{}, err
-	}
-
-	return hasher.Sum(nil), nil
+	hasher.Write([]byte(text))
+	return hasher.Sum(nil)
 }
 
 func posToXY(pos int8) (x, y int) {
