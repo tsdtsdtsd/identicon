@@ -87,6 +87,23 @@ func (ic *Identicon) GenerateImage() *image.RGBA {
 	return img
 }
 
+// HashString returns hash value as string
+func (ic *Identicon) HashString() string {
+	return hex.EncodeToString(ic.Hash)
+}
+
+// MD5 returns MD5 hash of given input string as byte slice
+func MD5(text string) []byte {
+	hasher := md5.New()
+	hasher.Write([]byte(text))
+	return hasher.Sum(nil)
+}
+
+// RGB returns color.NRGBA struct for given red, green and blue values
+func RGB(r, g, b uint8) color.NRGBA {
+	return color.NRGBA{R: r, G: g, B: b, A: 255}
+}
+
 func (ic *Identicon) drawTile(img *image.RGBA, xTile, yTile int) {
 
 	xStart := (xTile * (ic.Options.ImageSize / tilesPerDimension))
@@ -120,19 +137,19 @@ func (ic *Identicon) populateTiles() {
 	// Left
 	var i int8
 	for i = 0; i < 10; i++ {
-		ic.calcTile(i, ic.Hash[i])
+		ic.setTileValue(i, ic.Hash[i])
 	}
 
 	// Middle
 	for i = 10; i < 15; i++ {
-		ic.calcTile(i, ic.Hash[i])
+		ic.setTileValue(i, ic.Hash[i])
 	}
 
 	// Mirror to right
 	ic.mirror()
 }
 
-func (ic *Identicon) calcTile(pos int8, b byte) {
+func (ic *Identicon) setTileValue(pos int8, b byte) {
 
 	lever := (int(b) & 2) > 0
 	x, y := posToXY(pos)
@@ -171,11 +188,6 @@ func (ic *Identicon) defineColor() {
 	ic.Color = palette.WebSafe[colorIdx]
 }
 
-// HashString returns hash value as string
-func (ic *Identicon) HashString() string {
-	return hex.EncodeToString(ic.Hash)
-}
-
 // debugPrintTiles prints the tiles at positions x,y
 func (ic *Identicon) debugPrintTiles() {
 	for x := range ic.Tiles {
@@ -183,18 +195,6 @@ func (ic *Identicon) debugPrintTiles() {
 			fmt.Printf("Tile %d:%d = %v\n", x, y, v)
 		}
 	}
-}
-
-// MD5 returns MD5 hash of given input string as byte slice
-func MD5(text string) []byte {
-	hasher := md5.New()
-	hasher.Write([]byte(text))
-	return hasher.Sum(nil)
-}
-
-// RGB returns color.NRGBA struct for given red, green and blue values
-func RGB(r, g, b uint8) color.NRGBA {
-	return color.NRGBA{R: r, G: g, B: b, A: 255}
 }
 
 func posToXY(pos int8) (x, y int) {
