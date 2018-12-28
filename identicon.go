@@ -18,7 +18,7 @@ const (
 )
 
 var (
-	defaultBackgroundColor = RGB(235, 235, 235)
+	defaultBackgroundColor = RGB(240, 240, 240)
 )
 
 // Identicon defines an identicon

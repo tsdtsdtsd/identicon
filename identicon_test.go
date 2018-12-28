@@ -34,7 +34,9 @@ func TestNew(t *testing.T) {
 }
 
 func TestGernerate(t *testing.T) {
-	ic, _ := New(id, nil)
+	ic, _ := New(id, &Options{
+		BackgroundColor: RGB(235, 235, 235),
+	})
 	generated := ic.GenerateImage()
 
 	f, err := os.Open(id + ".png")
