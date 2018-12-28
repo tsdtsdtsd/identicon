@@ -81,15 +81,9 @@ func (ic *Identicon) GenerateImage() *image.RGBA {
 func (ic *Identicon) drawTile(img *image.RGBA, xTile, yTile int) {
 
 	xStart := (xTile * (imgWidth / tilesPerDimension))
-	if xStart < 0 {
-		xStart = 0
-	}
 	xEnd := xStart + (imgWidth / tilesPerDimension)
 
 	yStart := (yTile * (imgHeight / tilesPerDimension))
-	if yStart < 0 {
-		yStart = 0
-	}
 	yEnd := yStart + (imgHeight / tilesPerDimension)
 
 	// fmt.Println("x", xStart, xEnd)
