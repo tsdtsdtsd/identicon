@@ -11,14 +11,12 @@ import (
 )
 
 const (
-	imgWidth  = 100
-	imgHeight = 100
-
 	tilesPerDimension = 5
 )
 
 var (
 	defaultBackgroundColor = RGB(240, 240, 240)
+	defaultImageSize       = 100
 )
 
 // Identicon defines an identicon
@@ -34,6 +32,7 @@ type Identicon struct {
 type Options struct {
 	BackgroundColor color.NRGBA
 	Debug           bool
+	ImageSize       int
 }
 
 // New returns a new identicon based on given ID string
@@ -43,6 +42,10 @@ func New(ID string, opts *Options) (*Identicon, error) {
 		opts = &Options{
 			BackgroundColor: defaultBackgroundColor,
 		}
+	}
+
+	if opts.ImageSize <= 0 {
+		opts.ImageSize = defaultImageSize
 	}
 
 	return &Identicon{
@@ -63,7 +66,7 @@ func (ic *Identicon) GenerateImage() *image.RGBA {
 
 	bounds := image.Rectangle{
 		Min: image.Point{0, 0},
-		Max: image.Point{imgWidth, imgHeight},
+		Max: image.Point{ic.Options.ImageSize, ic.Options.ImageSize},
 	}
 
 	img := image.NewRGBA(bounds)
@@ -86,11 +89,11 @@ func (ic *Identicon) GenerateImage() *image.RGBA {
 
 func (ic *Identicon) drawTile(img *image.RGBA, xTile, yTile int) {
 
-	xStart := (xTile * (imgWidth / tilesPerDimension))
-	xEnd := xStart + (imgWidth / tilesPerDimension)
+	xStart := (xTile * (ic.Options.ImageSize / tilesPerDimension))
+	xEnd := xStart + (ic.Options.ImageSize / tilesPerDimension)
 
-	yStart := (yTile * (imgHeight / tilesPerDimension))
-	yEnd := yStart + (imgHeight / tilesPerDimension)
+	yStart := (yTile * (ic.Options.ImageSize / tilesPerDimension))
+	yEnd := yStart + (ic.Options.ImageSize / tilesPerDimension)
 
 	// fmt.Println("x", xStart, xEnd)
 	// fmt.Println("y", yStart, yEnd)
