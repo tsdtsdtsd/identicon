@@ -7,6 +7,7 @@ import (
 	"image"
 	"image/color"
 	"image/color/palette"
+	"image/draw"
 )
 
 const (
@@ -46,12 +47,12 @@ func New(ID string) (*Identicon, error) {
 }
 
 // GenerateImage returns an generated Image representation of the identicon
-func (ic *Identicon) GenerateImage() image.Image {
+func (ic *Identicon) GenerateImage() *image.RGBA {
 
 	ic.populateTiles()
 	ic.defineColor()
 	if debug {
-		ic.DebugPrintTiles()
+		ic.debugPrintTiles()
 	}
 
 	bounds := image.Rectangle{
@@ -59,13 +60,10 @@ func (ic *Identicon) GenerateImage() image.Image {
 		Max: image.Point{imgWidth, imgHeight},
 	}
 
-	img := image.NewPaletted(
-		bounds,
-		color.Palette{
-			backgroundColor,
-			ic.Color,
-		},
-	)
+	img := image.NewRGBA(bounds)
+
+	// Background fill
+	draw.Draw(img, img.Bounds(), &image.Uniform{backgroundColor}, image.ZP, draw.Src)
 
 	// Iterate tiles and draw
 	for xTile := 0; xTile < tilesPerDimension; xTile++ {
@@ -77,31 +75,28 @@ func (ic *Identicon) GenerateImage() image.Image {
 		}
 	}
 
-	return img.SubImage(bounds)
+	return img
 }
 
-func (ic *Identicon) drawTile(img *image.Paletted, xTile, yTile int) {
+func (ic *Identicon) drawTile(img *image.RGBA, xTile, yTile int) {
 
 	xStart := (xTile * (imgWidth / tilesPerDimension))
 	if xStart < 0 {
 		xStart = 0
 	}
-	xEnd := xStart + (imgWidth / tilesPerDimension) - 1
+	xEnd := xStart + (imgWidth / tilesPerDimension)
 
 	yStart := (yTile * (imgHeight / tilesPerDimension))
 	if yStart < 0 {
 		yStart = 0
 	}
-	yEnd := yStart + (imgHeight / tilesPerDimension) - 1
+	yEnd := yStart + (imgHeight / tilesPerDimension)
 
 	// fmt.Println("x", xStart, xEnd)
 	// fmt.Println("y", yStart, yEnd)
 
-	for x := xStart; x <= xEnd; x++ {
-		for y := yStart; y <= yEnd; y++ {
-			img.SetColorIndex(x, y, 1)
-		}
-	}
+	bounds := image.Rect(xStart, yStart, xEnd, yEnd)
+	draw.Draw(img, bounds, &image.Uniform{ic.Color}, image.ZP, draw.Src)
 }
 
 func (ic *Identicon) populateTiles() {
@@ -178,8 +173,8 @@ func (ic *Identicon) HashString() string {
 	return hex.EncodeToString(ic.Hash)
 }
 
-// DebugPrintTiles prints the tiles at positions x,y
-func (ic *Identicon) DebugPrintTiles() {
+// debugPrintTiles prints the tiles at positions x,y
+func (ic *Identicon) debugPrintTiles() {
 	for x := range ic.Tiles {
 		for y, v := range ic.Tiles[x] {
 			fmt.Printf("Tile %d:%d = %v\n", x, y, v)
