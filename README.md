@@ -5,7 +5,9 @@
 [![Godoc][godoc-image]][godoc-url]
 [![Build Status][travis-image]][travis-url]
 [![Go Report Card][grc-image]][grc-url]
-[![codecov](https://codecov.io/gh/tsdtsdtsd/identicon/branch/master/graph/badge.svg)](https://codecov.io/gh/tsdtsdtsd/identicon)
+[![codecov][codecov-image]][codecov-url]
+
+This Go library helps generating deterministic [Identicons][identicon-wiki], like this one:
 
 ![Example](example/identicon.png "Example")
 
@@ -19,6 +21,9 @@ go get github.com/tsdtsdtsd/identicon
 
 Take a look at the `/example` folder, it contains a simple usage example.
 
+Basically, you construct a new `Identicon`, giving it your identification string and some `Options`. 
+Calling the `GenerateImage()` method will return an `*image.RGBA`, which you can use in many ways.
+
 <!-- Markdown link & img dfn's -->
 [grc-image]: https://goreportcard.com/badge/github.com/tsdtsdtsd/identicon
 [grc-url]: https://goreportcard.com/report/github.com/tsdtsdtsd/identicon
@@ -26,3 +31,6 @@ Take a look at the `/example` folder, it contains a simple usage example.
 [godoc-url]: https://godoc.org/github.com/tsdtsdtsd/identicon
 [travis-image]: https://travis-ci.org/tsdtsdtsd/identicon.svg?branch=master
 [travis-url]: https://travis-ci.org/tsdtsdtsd/identicon
+[codecov-image]: https://codecov.io/gh/tsdtsdtsd/identicon/branch/master/graph/badge.svg
+[codecov-url]: https://codecov.io/gh/tsdtsdtsd/identicon
+[identicon-wiki]: https://en.wikipedia.org/wiki/Identicon
