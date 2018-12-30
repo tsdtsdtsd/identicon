@@ -9,7 +9,9 @@
 
 This Go library helps generating deterministic [Identicons][identicon-wiki], like these:
 
-![Example](example/images/identicon.png "Example") . ![Example](example/images/test-string.png "Example") . ![Example](example/images/Amazatron3000.png "Example") . ![Example](example/images/yay-identicons.png "Example") . ![Example](example/images/m.jackson.png "Example")
+![Example](example/images/unknown.png "Example") . ![Example](example/images/test-string.png "Example") . ![Example](example/images/Amazatron3000.png "Example") . ![Example](example/images/yay-identicons.png "Example") . ![Example](example/images/m.jackson.png "Example")
+
+![Example](example/images/12monkeys.png "Example") . ![Example](example/images/Stan.Lee.png "Example") . ![Example](example/images/gogopher.png "Example") . ![Example](example/images/notblue.png "Example") . ![Example](example/images/test.png "Example")
 
 ## Installation
 
