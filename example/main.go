@@ -16,10 +16,10 @@ func main() {
 	}
 	defer fi.Close()
 
-	ic, err := identicon.New("oh-hello@my-identicon.com", &identicon.Options{Debug: false, BackgroundColor: identicon.RGB(240, 240, 240)})
+	ic, err := identicon.New("identicon", &identicon.Options{Debug: false, BackgroundColor: identicon.RGB(240, 240, 240)})
 	if err != nil {
 		panic(err.Error())
 	}
 
-	png.Encode(fi, ic.GenerateImage())
+	png.Encode(fi, ic)
 }

@@ -37,8 +37,8 @@ func TestGernerate(t *testing.T) {
 	ic, _ := New(id, &Options{
 		BackgroundColor: RGB(235, 235, 235),
 		ImageSize:       100,
+		Debug:           true,
 	})
-	generated := ic.GenerateImage()
 
 	f, err := os.Open("example/images/" + id + ".png")
 	if err != nil {
@@ -51,7 +51,7 @@ func TestGernerate(t *testing.T) {
 		panic("Could not decode proof file: " + err.Error())
 	}
 
-	if generated.Bounds() != proof.Bounds() {
+	if ic.Bounds() != proof.Bounds() {
 		t.Error("Generated image dimensions differ from proof file")
 	}
 
@@ -61,7 +61,7 @@ LOOP:
 	for x := 0; x < proof.Bounds().Dx(); x++ {
 		for y := 0; y < proof.Bounds().Dy(); y++ {
 
-			genR, genG, genB, genA := generated.At(x, y).RGBA()
+			genR, genG, genB, genA := ic.At(x, y).RGBA()
 			proR, proG, proB, proA := proof.At(x, y).RGBA()
 
 			// genR, genG, genB, genA := uint8(genR32), uint8(genG32), uint8(genB32), uint8(genA32)
@@ -116,21 +116,27 @@ func TestOutOfBounds(t *testing.T) {
 		BackgroundColor: RGB(235, 235, 235),
 		ImageSize:       100,
 	})
-	ic.GenerateImage()
 
 	blank := color.NRGBA{}
 	if ic.NRGBAAt(-1, -1) != blank || ic.NRGBAAt(101, 101) != blank {
-		t.Error("OOB")
+		t.Error("OOB NRGBAAt")
 	}
 
-}
+	for _, val := range ic.Pix {
+		if val == 0 {
+			t.Error("OOB Set test incomplete, there already are black pixels")
+			break
+		}
+	}
 
-func TestDebug(t *testing.T) {
-	ic, _ := New(id, &Options{Debug: true})
-	generated := ic.GenerateImage()
+	ic.Set(-1, -1, blank)
+	ic.Set(101, 101, blank)
 
-	if generated == nil {
-		t.Error("Generation for debug test failed")
+	for _, val := range ic.Pix {
+		if val == 0 {
+			t.Error("OOB Set should not succeed, but did")
+			break
+		}
 	}
 }
 

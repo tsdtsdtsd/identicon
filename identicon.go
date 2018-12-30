@@ -1,3 +1,4 @@
+// Package identicon helps generating deterministic user identicons
 package identicon
 
 import (
@@ -18,6 +19,13 @@ var (
 	defaultImageSize       = 100
 )
 
+// Options control some inner mechanics
+type Options struct {
+	BackgroundColor color.NRGBA
+	Debug           bool
+	ImageSize       int
+}
+
 // Identicon defines an identicon
 type Identicon struct {
 	Color   color.Color
@@ -32,13 +40,6 @@ type Identicon struct {
 	Stride int
 	// Rect is the image's bounds.
 	Rect image.Rectangle
-}
-
-// Options control some inner mechanics
-type Options struct {
-	BackgroundColor color.NRGBA
-	Debug           bool
-	ImageSize       int
 }
 
 // New returns a new identicon based on given ID string
@@ -62,18 +63,77 @@ func New(ID string, opts *Options) (*Identicon, error) {
 	w, h := rect.Dx(), rect.Dy()
 	buf := make([]uint8, 4*w*h)
 
-	return &Identicon{
+	ic := &Identicon{
 		ID:      ID,
 		Hash:    MD5(ID),
 		Options: opts,
 		Pix:     buf,
 		Rect:    rect,
 		Stride:  4 * w,
-	}, nil
+	}
+
+	ic.generateImage()
+	return ic, nil
 }
 
-// GenerateImage returns an generated Image representation of the identicon
-func (ic *Identicon) GenerateImage() image.Image {
+// ColorModel returns the Image's color model.
+func (ic *Identicon) ColorModel() color.Model {
+	return color.ModelFunc(
+		func(c color.Color) color.Color {
+			// @todo
+			return c
+		},
+	)
+}
+
+// Bounds returns the domain for which At can return non-zero color.
+func (ic *Identicon) Bounds() image.Rectangle {
+	return ic.Rect
+}
+
+// At returns the color of the pixel at (x, y).
+// At(Bounds().Min.X, Bounds().Min.Y) returns the upper-left pixel of the grid.
+// At(Bounds().Max.X-1, Bounds().Max.Y-1) returns the lower-right one.
+func (ic *Identicon) At(x, y int) color.Color {
+	return ic.NRGBAAt(x, y)
+}
+
+// NRGBAAt returns the color of the pixel at (x, y) as color.NRGBA.
+func (ic *Identicon) NRGBAAt(x, y int) color.NRGBA {
+	if !(image.Point{x, y}.In(ic.Rect)) {
+		return color.NRGBA{}
+	}
+	i := ic.PixOffset(x, y)
+	return color.NRGBA{ic.Pix[i+0], ic.Pix[i+1], ic.Pix[i+2], ic.Pix[i+3]}
+}
+
+// PixOffset returns the index of the first element of Pix that corresponds to
+// the pixel at (x, y).
+func (ic *Identicon) PixOffset(x, y int) int {
+	return (y-ic.Rect.Min.Y)*ic.Stride + (x-ic.Rect.Min.X)*4
+}
+
+// Set stores given color at position (x, y).
+func (ic *Identicon) Set(x, y int, c color.Color) {
+	if !(image.Point{x, y}.In(ic.Rect)) {
+		return
+	}
+
+	i := ic.PixOffset(x, y)
+	c1 := ic.ColorModel().Convert(c).(color.NRGBA)
+	ic.Pix[i+0] = c1.R
+	ic.Pix[i+1] = c1.G
+	ic.Pix[i+2] = c1.B
+	ic.Pix[i+3] = c1.A
+}
+
+// HashString returns hash value as string
+func (ic *Identicon) HashString() string {
+	return hex.EncodeToString(ic.Hash)
+}
+
+// generateImage generates image.Image representation of the identicon
+func (ic *Identicon) generateImage() {
 
 	ic.populateTiles()
 	ic.defineColor()
@@ -93,8 +153,6 @@ func (ic *Identicon) GenerateImage() image.Image {
 
 		}
 	}
-
-	return ic
 }
 
 func (ic *Identicon) drawTile(xTile, yTile int) {
@@ -190,6 +248,19 @@ func (ic *Identicon) debugPrintTiles() {
 	}
 }
 
+// MD5 returns MD5 hash of given input string as byte slice
+func MD5(text string) []byte {
+	hasher := md5.New()
+	hasher.Write([]byte(text))
+	hasher.Size()
+	return hasher.Sum(nil)
+}
+
+// RGB returns color.NRGBA struct for given red, green and blue values
+func RGB(r, g, b uint8) color.NRGBA {
+	return color.NRGBA{R: r, G: g, B: b, A: 255}
+}
+
 func posToXY(pos int8) (x, y int) {
 
 	// The two leftmost cols
@@ -205,71 +276,4 @@ func posToXY(pos int8) (x, y int) {
 	}
 
 	return
-}
-
-// HashString returns hash value as string
-func (ic *Identicon) HashString() string {
-	return hex.EncodeToString(ic.Hash)
-}
-
-// MD5 returns MD5 hash of given input string as byte slice
-func MD5(text string) []byte {
-	hasher := md5.New()
-	hasher.Write([]byte(text))
-	hasher.Size()
-	return hasher.Sum(nil)
-}
-
-// RGB returns color.NRGBA struct for given red, green and blue values
-func RGB(r, g, b uint8) color.NRGBA {
-	return color.NRGBA{R: r, G: g, B: b, A: 255}
-}
-
-// ColorModel returns the Image's color model.
-func (ic *Identicon) ColorModel() color.Model {
-	return color.ModelFunc(
-		func(c color.Color) color.Color {
-			// @todo
-			return c
-		},
-	)
-}
-
-// Bounds returns the domain for which At can return non-zero color.
-func (ic *Identicon) Bounds() image.Rectangle {
-	return ic.Rect
-}
-
-// At returns the color of the pixel at (x, y).
-// At(Bounds().Min.X, Bounds().Min.Y) returns the upper-left pixel of the grid.
-// At(Bounds().Max.X-1, Bounds().Max.Y-1) returns the lower-right one.
-func (ic *Identicon) At(x, y int) color.Color {
-	return ic.NRGBAAt(x, y)
-}
-
-func (ic *Identicon) NRGBAAt(x, y int) color.NRGBA {
-	if !(image.Point{x, y}.In(ic.Rect)) {
-		return color.NRGBA{}
-	}
-	i := ic.PixOffset(x, y)
-	return color.NRGBA{ic.Pix[i+0], ic.Pix[i+1], ic.Pix[i+2], ic.Pix[i+3]}
-}
-
-// PixOffset returns the index of the first element of Pix that corresponds to
-// the pixel at (x, y).
-func (ic *Identicon) PixOffset(x, y int) int {
-	return (y-ic.Rect.Min.Y)*ic.Stride + (x-ic.Rect.Min.X)*4
-}
-
-func (ic *Identicon) Set(x, y int, c color.Color) {
-	if !(image.Point{x, y}.In(ic.Rect)) {
-		return
-	}
-
-	i := ic.PixOffset(x, y)
-	c1 := ic.ColorModel().Convert(c).(color.NRGBA)
-	ic.Pix[i+0] = c1.R
-	ic.Pix[i+1] = c1.G
-	ic.Pix[i+2] = c1.B
-	ic.Pix[i+3] = c1.A
 }
