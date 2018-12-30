@@ -3,7 +3,6 @@ package identicon
 import (
 	"fmt"
 	"image"
-	"image/draw"
 	"image/png"
 	"math"
 	"os"
@@ -51,47 +50,65 @@ func TestGernerate(t *testing.T) {
 		panic("Could not decode proof file: " + err.Error())
 	}
 
-	rgba := image.NewRGBA(proof.Bounds())
-	draw.Draw(rgba, proof.Bounds(), proof, proof.Bounds().Min, draw.Src)
-
-	i, err := FastCompare(rgba, generated)
-	if err != nil {
-		t.Error("Compare error: " + err.Error())
+	if generated.Bounds() != proof.Bounds() {
+		t.Error("Generated image dimensions differ from proof file")
 	}
 
-	if i > 0 {
-		t.Error("Generated image not identical to proof")
+	var diff bool
+
+LOOP:
+	for x := 0; x < proof.Bounds().Dx(); x++ {
+		for y := 0; y < proof.Bounds().Dy(); y++ {
+
+			genR, genG, genB, genA := generated.At(x, y).RGBA()
+			proR, proG, proB, proA := proof.At(x, y).RGBA()
+
+			// genR, genG, genB, genA := uint8(genR32), uint8(genG32), uint8(genB32), uint8(genA32)
+			// proR, proG, proB, proA := uint8(proR32), uint8(proG32), uint8(proB32), uint8(proA32)
+
+			if genR != proR || genG != proG || genB != proB || genA != proA {
+				// e := fmt.Sprintf("Compare error at %d:%d", x, y)
+				// t.Error(e)
+				// fmt.Println("X:Y ", x, y, " || ", genR, genG, genB, genA, "||", proR, proG, proB, proA)
+				diff = true
+				break LOOP
+			}
+		}
+	}
+
+	if diff {
+		t.Error("Generated image not identical to proof file")
 	}
 }
 
-func TestColorPalette(t *testing.T) {
-	ic, _ := New(id, nil)
-	ic.Hash = []byte{
-		byte(0),
-		byte(1),
-		byte(1),
-		byte(1),
-		byte(1),
-		byte(1),
-		byte(1),
-		byte(1),
-		byte(1),
-		byte(1),
-		byte(1),
-		byte(1),
-		byte(1),
-		byte(1),
-		byte(1),
-		byte(255), // Color byte may not overflow palette size of 215
-	}
+// func TestColorPalette(t *testing.T) {
+// 	ic, _ := New(id, nil)
+// 	ic.Hash = []byte{
+// 		byte(0),
+// 		byte(1),
+// 		byte(1),
+// 		byte(1),
+// 		byte(1),
+// 		byte(1),
+// 		byte(1),
+// 		byte(1),
+// 		byte(1),
+// 		byte(1),
+// 		byte(1),
+// 		byte(1),
+// 		byte(1),
+// 		byte(1),
+// 		byte(1),
+// 		byte(255), // Color byte may not overflow palette size of 215
+// 	}
 
-	generated := ic.GenerateImage()
+// 	generated := ic.GenerateImage()
 
-	if generated == nil {
-		t.Error("Generation for color palette test failed")
-	}
+// 	if generated == nil {
+// 		t.Error("Generation for color palette test failed")
+// 	}
 
-}
+// }
 
 func TestDebug(t *testing.T) {
 	ic, _ := New(id, &Options{Debug: true})
