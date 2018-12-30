@@ -24,7 +24,7 @@ go get github.com/tsdtsdtsd/identicon
 Take a look at the `/example` folder, it contains a simple usage example.
 
 Basically, you construct a new Identicon with `New`, giving it your identification string and some optional `Options`. 
-The resulting struct implements `image.Image`, so you can use it flexibly.
+The resulting struct implements `image.Image` and `draw.Image`, so you can use it flexibly.
 
 <!-- Markdown link & img dfn's -->
 [grc-image]: https://goreportcard.com/badge/github.com/tsdtsdtsd/identicon
