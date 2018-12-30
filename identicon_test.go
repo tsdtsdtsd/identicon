@@ -3,6 +3,7 @@ package identicon
 import (
 	"fmt"
 	"image"
+	"image/color"
 	"image/png"
 	"math"
 	"os"
@@ -39,7 +40,7 @@ func TestGernerate(t *testing.T) {
 	})
 	generated := ic.GenerateImage()
 
-	f, err := os.Open(id + ".png")
+	f, err := os.Open("example/images/" + id + ".png")
 	if err != nil {
 		panic("Could not open proof file: " + err.Error())
 	}
@@ -109,6 +110,20 @@ LOOP:
 // 	}
 
 // }
+
+func TestOutOfBounds(t *testing.T) {
+	ic, _ := New(id, &Options{
+		BackgroundColor: RGB(235, 235, 235),
+		ImageSize:       100,
+	})
+	ic.GenerateImage()
+
+	blank := color.NRGBA{}
+	if ic.NRGBAAt(-1, -1) != blank || ic.NRGBAAt(101, 101) != blank {
+		t.Error("OOB")
+	}
+
+}
 
 func TestDebug(t *testing.T) {
 	ic, _ := New(id, &Options{Debug: true})
