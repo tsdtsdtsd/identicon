@@ -80,7 +80,6 @@ func New(ID string, opts *Options) (*Identicon, error) {
 func (ic *Identicon) ColorModel() color.Model {
 	return color.ModelFunc(
 		func(c color.Color) color.Color {
-			// @todo
 			return c
 		},
 	)
@@ -168,7 +167,7 @@ func (ic *Identicon) drawTile(xTile, yTile int) {
 
 	bounds := image.Rect(xStart, yStart, xEnd, yEnd)
 
-	// @todo possibly faster to just iterate pixels and use ic.Set()
+	// @todo possibly faster to just iterate pixels and use ic.Set(), benchmark
 	draw.Draw(ic, bounds, &image.Uniform{ic.Color}, image.ZP, draw.Src)
 
 }
@@ -186,7 +185,7 @@ func (ic *Identicon) populateTiles() {
 	// First 15 bytes of hash define tiles:
 	//   - first 10 are the two leftmost cols and get mirrored to the rightmost cols
 	//   - next 5 for the middle col
-	// Last byte for the pixel color
+	// Last 3 bytes for the pixel color RGB values
 
 	// Left
 	var i int8
@@ -230,6 +229,7 @@ func (ic *Identicon) mirror() {
 
 func (ic *Identicon) defineColor() {
 
+	// Last 3 bytes of hash are the RGB values
 	// @todo too random? custom palette?
 	ic.Color = color.NRGBA{
 		R: uint8(ic.Hash[15]),
