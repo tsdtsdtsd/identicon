@@ -16,10 +16,21 @@ func main() {
 	}
 	defer fi.Close()
 
-	ic, err := identicon.New("identicon", &identicon.Options{Debug: false, BackgroundColor: identicon.RGB(240, 240, 240)})
+	// Just create a new identicon
+	ic, err := identicon.New(
+		// The identicon ID string is mandatory.
+		// Same string will always result in the same generated identicon.
+		// Typically this is a username or email address.
+		"identicon",
+		// You can define custom options or pass nil for defaults
+		&identicon.Options{
+			BackgroundColor: identicon.RGB(240, 240, 240),
+		},
+	)
 	if err != nil {
-		panic(err.Error())
+		log.Fatal(err)
 	}
 
+	// Now you are free to use identicon as any other image.Image or draw.Image interface
 	png.Encode(fi, ic)
 }
