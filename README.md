@@ -9,9 +9,7 @@
 
 This Go library helps generating deterministic [Identicons][identicon-wiki], like these:
 
-![Example](example/images/unknown.png "Example") . ![Example](example/images/test-string.png "Example") . ![Example](example/images/Amazatron3000.png "Example") . ![Example](example/images/yay-identicons.png "Example") . ![Example](example/images/m.jackson.png "Example")
-
-![Example](example/images/12monkeys.png "Example") . ![Example](example/images/Stan.Lee.png "Example") . ![Example](example/images/gogopher.png "Example") . ![Example](example/images/notblue.png "Example") . ![Example](example/images/test.png "Example")
+![Example Banner](identicon-banner.png "Example Banner")
 
 ## Installation
 
@@ -21,10 +19,48 @@ go get github.com/tsdtsdtsd/identicon
 
 ## Usage example
 
-Take a look at the `/example` folder, it contains a simple usage example.
-
-Basically, you construct a new Identicon with `New`, giving it your identification string and some optional `Options`. 
+Basically, you construct a new `Identicon` type with `identicon.New()`, giving it your identification string and some optional `identicon.Options`. 
 The resulting struct implements `image.Image` and `draw.Image`, so you can use it flexibly.
+
+Just import the library and create a new identicon:
+
+```go
+package main
+
+import (
+    "log"
+    "github.com/tsdtsdtsd/identicon"
+) 
+
+func main() {
+    
+    ic, err := identicon.New(
+        
+        // The identicon ID string is mandatory.
+	// Same string will always result in the same generated identicon.
+	// Typically this is a username or email address.
+        "identicon",
+        
+	// You can define custom options or pass nil for defaults
+	&identicon.Options{
+	    BackgroundColor: identicon.RGB(240, 240, 240),
+	},
+    )
+    
+    if err != nil {
+	log.Fatal(err)
+    }
+    
+    // Now you are free to use identicon `ic` as any other image.Image or draw.Image interface
+    fi, _ := os.Create("my-file.png")
+    png.Encode(fi, ic)
+}
+```
+
+### Banner example
+
+You can find another example in the `/example` folder. It contains an application, which generates the above image.
+It also helps me to test the algorythm for changes.
 
 <!-- Markdown link & img dfn's -->
 [grc-image]: https://goreportcard.com/badge/github.com/tsdtsdtsd/identicon
