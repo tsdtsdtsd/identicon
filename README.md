@@ -1,6 +1,6 @@
 # Identicon
 
-> An experimental Go library for Identicon generation
+> A Go library for Identicon generation
 
 [![Godoc][godoc-image]][godoc-url]
 [![Build Status][travis-image]][travis-url]
