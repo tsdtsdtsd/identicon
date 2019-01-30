@@ -78,11 +78,7 @@ func New(ID string, opts *Options) (*Identicon, error) {
 
 // ColorModel returns the Image's color model.
 func (ic *Identicon) ColorModel() color.Model {
-	return color.ModelFunc(
-		func(c color.Color) color.Color {
-			return c
-		},
-	)
+	return color.NRGBAModel
 }
 
 // Bounds returns the domain for which At can return non-zero color.
