@@ -2,19 +2,23 @@
 
 > A Go library for Identicon generation
 
+![Latest Release Version][shields-version-img]
 [![Godoc][godoc-image]][godoc-url]
 [![Build Status][travis-image]][travis-url]
 [![Go Report Card][grc-image]][grc-url]
 [![codecov][codecov-image]][codecov-url]
 
-This Go library helps generating deterministic [Identicons][identicon-wiki], like these:
+This Go library helps to generate deterministic [Identicons][identicon-wiki] from strings, like these:
 
 ![Example Banner](identicon-banner.png "Example Banner")
 
 ## Installation
 
+With module support, you can just import `github.com/tsdtsdtsd/identicon`.
+
+In other cases you may have to manually:
 ```sh
-go get github.com/tsdtsdtsd/identicon
+go get -u github.com/tsdtsdtsd/identicon
 ```
 
 ## Usage example
@@ -71,4 +75,5 @@ It also helps me to test the algorythm for changes.
 [travis-url]: https://travis-ci.org/tsdtsdtsd/identicon
 [codecov-image]: https://codecov.io/gh/tsdtsdtsd/identicon/branch/master/graph/badge.svg
 [codecov-url]: https://codecov.io/gh/tsdtsdtsd/identicon
+[shields-version-img]: https://img.shields.io/github/v/release/tsdtsdtsd/identicon
 [identicon-wiki]: https://en.wikipedia.org/wiki/Identicon
