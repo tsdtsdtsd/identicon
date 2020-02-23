@@ -16,8 +16,7 @@ func main() {
 		// The identicon ID string is mandatory.
 		// Same string will always result in the same generated identicon.
 		// Typically this is a username or email address.
-		"identicon@example.com",
-
+		"jack@example.com",
 		// You can define custom options or pass nil for defaults
 		&identicon.Options{
 			BackgroundColor: identicon.RGB(240, 240, 240),

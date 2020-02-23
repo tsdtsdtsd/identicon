@@ -32,7 +32,10 @@ Just import the library and create a new identicon:
 package main
 
 import (
+    "image/png"
     "log"
+    "os"
+    
     "github.com/tsdtsdtsd/identicon"
 ) 
 
@@ -41,18 +44,18 @@ func main() {
     ic, err := identicon.New(
         
         // The identicon ID string is mandatory.
-	// Same string will always result in the same generated identicon.
-	// Typically this is a username or email address.
-        "identicon",
+        // Same string will always result in the same generated identicon.
+        // Typically this is a username or email address.
+        "my-identicon@example.com",
         
-	// You can define custom options or pass nil for defaults
-	&identicon.Options{
-	    BackgroundColor: identicon.RGB(240, 240, 240),
-	},
+        // You can define custom options or pass nil for defaults
+        &identicon.Options{
+	        BackgroundColor: identicon.RGB(240, 240, 240),
+	    },
     )
     
     if err != nil {
-	log.Fatal(err)
+	    log.Fatal(err)
     }
     
     // Now you are free to use identicon `ic` as any other image.Image or draw.Image interface
