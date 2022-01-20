@@ -7,6 +7,7 @@
 [![Build Status][travis-image]][travis-url]
 [![Go Report Card][grc-image]][grc-url]
 [![codecov][codecov-image]][codecov-url]
+[![CodeQL](https://github.com/tsdtsdtsd/identicon/actions/workflows/codeql-analysis.yml/badge.svg?branch=master)](https://github.com/tsdtsdtsd/identicon/actions/workflows/codeql-analysis.yml)
 
 This Go library helps to generate deterministic [Identicons][identicon-wiki] from strings, like these:
 
