@@ -111,22 +111,22 @@ func TestWithGridResolutionNonPositiveValueShouldBeDiscarded(t *testing.T) {
 }
 
 func TestHashHasTheExpectedValue(t *testing.T) {
-	t.Skip()
+
 	testSet := []struct {
 		identifier   string
 		expectedHash string
 	}{
 		{
 			identifier:   "my-test",
-			expectedHash: "4cb602ad084ff78d76a7f90aa5901b22",
+			expectedHash: "6f14f2bed3ec4e0d3db3c7f62c2d9aef6f14f2bed3ec4e0d3db3c7f62c2d9aef",
 		},
 		{
 			identifier:   "0",
-			expectedHash: "d228cb69401a8caf78912b704e4a4f8f",
+			expectedHash: "cfcd208495d565ef66e7dff9f98764dacfcd208495d565ef66e7dff9f98764da",
 		},
 		{
 			identifier:   "my-second-test-is-a-lot-larger-than-the-first-test-i-swear",
-			expectedHash: "33d9c9980e14bd067e8e5995c54270a1",
+			expectedHash: "6eb92c6a1ff075525502a0b84470debe6eb92c6a1ff075525502a0b84470debe",
 		},
 	}
 	for _, test := range testSet {
@@ -139,7 +139,6 @@ func TestHashHasTheExpectedValue(t *testing.T) {
 
 func TestMatrixIsCorrect(t *testing.T) {
 
-	t.Skip()
 	// TODO: test different resolutions
 
 	testSet := []struct {
@@ -149,31 +148,31 @@ func TestMatrixIsCorrect(t *testing.T) {
 		{
 			identifier: "my-test",
 			expectedMatrix: [][]bool{
-				{false, true, true, false, false},
-				{true, true, false, true, true},
+				{true, false, true, true, true},
 				{false, true, false, false, true},
-				{true, true, false, true, true},
-				{false, true, true, false, false},
+				{true, true, false, false, true},
+				{false, true, false, false, true},
+				{true, false, true, true, true},
 			},
 		},
 		{
 			identifier: "0",
 			expectedMatrix: [][]bool{
-				{true, false, true, false, false},
-				{true, false, true, false, false},
-				{true, false, true, true, true},
-				{true, false, true, false, false},
-				{true, false, true, false, false},
+				{true, false, false, false, false},
+				{false, false, true, true, true},
+				{true, false, false, true, false},
+				{false, false, true, true, true},
+				{true, false, false, false, false},
 			},
 		},
 		{
 			identifier: "my-second-test-is-a-lot-larger-than-the-first-test-i-swear",
 			expectedMatrix: [][]bool{
-				{true, false, false, false, true},
-				{false, false, true, true, true},
-				{false, false, false, true, false},
-				{false, false, true, true, true},
-				{true, false, false, false, true},
+				{true, false, false, true, true},
+				{false, false, true, false, true},
+				{false, false, false, false, true},
+				{false, false, true, false, true},
+				{true, false, false, true, true},
 			},
 		},
 	}
