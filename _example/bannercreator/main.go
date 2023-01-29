@@ -2,12 +2,13 @@ package main
 
 import (
 	"image"
+	"image/color"
 	"image/draw"
 	"image/png"
 	"log"
 	"os"
 
-	"github.com/tsdtsdtsd/identicon"
+	"github.com/tsdtsdtsd/identicon/v1"
 )
 
 var genIDs = []string{
@@ -42,13 +43,13 @@ func main() {
 
 	// Create banner and fill background
 	banner := image.NewRGBA(image.Rect(0, 0, x1, y1))
-	draw.Draw(banner, image.Rect(0, 0, x1, y1), &image.Uniform{identicon.RGB(255, 255, 255)}, image.ZP, draw.Src)
+	draw.Draw(banner, image.Rect(0, 0, x1, y1), &image.Uniform{color.RGBA{255, 255, 255, 255}}, image.Point{}, draw.Src)
 
 	// Iterate IDs
 	for i, id := range genIDs {
 
 		// Create a new identicon
-		ic, err := identicon.New(id, nil)
+		ic, err := identicon.New(id)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -65,7 +66,7 @@ func main() {
 		y1 := y0 + size
 
 		// Draw identicon on banner
-		draw.Draw(banner, image.Rect(x0, y0, x1, y1), ic, image.ZP, draw.Src)
+		draw.Draw(banner, image.Rect(x0, y0, x1, y1), ic, image.Point{}, draw.Src)
 	}
 
 	// Encode and write banner to file

@@ -1,109 +1,266 @@
-package identicon
+package identicon_test
 
 import (
+	"fmt"
 	"image/color"
 	"image/png"
+	"log"
 	"os"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	v0 "github.com/tsdtsdtsd/identicon"
+	"github.com/tsdtsdtsd/identicon/v1"
 )
 
-var (
-	id = "test-string"
-)
+var identifier = "my-test-identifier"
 
-func TestNew(t *testing.T) {
+func TestIdentifierMustNotBeEmpty(t *testing.T) {
 
-	ic, err := New(id, nil)
-	if ic == nil {
-		t.Error("New Identicon struct is nil")
+	icon, err := identicon.New("")
+
+	t.Run("icon is nil", func(t *testing.T) {
+		assert.Nil(t, icon)
+	})
+
+	t.Run("has error", func(t *testing.T) {
+		assert.Error(t, err)
+	})
+}
+
+func TestBasicIdenticon(t *testing.T) {
+
+	icon, err := identicon.New(identifier)
+
+	t.Run("icon is not nil", func(t *testing.T) {
+		assert.NotNil(t, icon)
+	})
+
+	t.Run("has no errors", func(t *testing.T) {
+		assert.NoError(t, err)
+	})
+
+	t.Run("icon has default options", func(t *testing.T) {
+		defaultOptions := identicon.DefaultOptions()
+		assert.Equal(t, defaultOptions, icon.Options())
+	})
+
+	t.Run("icon has correct identifier set", func(t *testing.T) {
+		assert.Equal(t, identifier, icon.Identifier)
+	})
+}
+
+func TestWithBGColorShouldSetOption(t *testing.T) {
+
+	red := color.NRGBA{255, 0, 0, 255}
+	defaultOptions := identicon.DefaultOptions()
+	defaultOptions.BGColor = red
+
+	icon, err := identicon.New(
+		identifier,
+		identicon.WithBGColor(red),
+	)
+
+	assert.NotNil(t, icon)
+	assert.NoError(t, err)
+	assert.Equal(t, defaultOptions, icon.Options())
+}
+
+func TestWithGridResolutionShouldSetOption(t *testing.T) {
+
+	resolution := 8
+	defaultOptions := identicon.DefaultOptions()
+	defaultOptions.GridResolution = resolution
+
+	icon, err := identicon.New(
+		identifier,
+		identicon.WithGridResolution(resolution),
+	)
+
+	assert.NotNil(t, icon)
+	assert.NoError(t, err)
+	assert.Equal(t, defaultOptions, icon.Options())
+}
+
+func TestWithGridResolutionNonPositiveValueShouldBeDiscarded(t *testing.T) {
+
+	defaultOptions := identicon.DefaultOptions()
+
+	t.Run("zero given", func(t *testing.T) {
+		resolution := 0
+
+		icon, err := identicon.New(
+			identifier,
+			identicon.WithGridResolution(resolution),
+		)
+
+		assert.NotNil(t, icon)
+		assert.NoError(t, err)
+		assert.Equal(t, defaultOptions, icon.Options())
+	})
+
+	t.Run("negative given", func(t *testing.T) {
+		resolution := -5
+
+		icon, err := identicon.New(
+			identifier,
+			identicon.WithGridResolution(resolution),
+		)
+
+		assert.NotNil(t, icon)
+		assert.NoError(t, err)
+		assert.Equal(t, defaultOptions, icon.Options())
+	})
+}
+
+func TestWithImageSizeShouldSetOption(t *testing.T) {
+
+	size := 60
+	defaultOptions := identicon.DefaultOptions()
+	defaultOptions.ImageSize = size
+
+	icon, err := identicon.New(
+		identifier,
+		identicon.WithImageSize(size),
+	)
+
+	assert.NotNil(t, icon)
+	assert.NoError(t, err)
+	assert.Equal(t, defaultOptions, icon.Options())
+}
+
+func TestWithImageSizeNonPositiveValueShouldBeDiscarded(t *testing.T) {
+
+	defaultOptions := identicon.DefaultOptions()
+
+	t.Run("zero given", func(t *testing.T) {
+		size := 0
+
+		icon, err := identicon.New(
+			identifier,
+			identicon.WithImageSize(size),
+		)
+
+		assert.NotNil(t, icon)
+		assert.NoError(t, err)
+		assert.Equal(t, defaultOptions, icon.Options())
+	})
+
+	t.Run("negative given", func(t *testing.T) {
+		size := -5
+
+		icon, err := identicon.New(
+			identifier,
+			identicon.WithImageSize(size),
+		)
+
+		assert.NotNil(t, icon)
+		assert.NoError(t, err)
+		assert.Equal(t, defaultOptions, icon.Options())
+	})
+}
+func TestHashHasTheExpectedValue(t *testing.T) {
+
+	testSet := []struct {
+		identifier   string
+		expectedHash string
+	}{
+		{
+			identifier:   "my-test",
+			expectedHash: "6f14f2bed3ec4e0d3db3c7f62c2d9aef6f14f2bed3ec4e0d3db3c7f62c2d9aef",
+		},
+		{
+			identifier:   "0",
+			expectedHash: "cfcd208495d565ef66e7dff9f98764dacfcd208495d565ef66e7dff9f98764da",
+		},
+		{
+			identifier:   "my-second-test-is-a-lot-larger-than-the-first-test-i-swear",
+			expectedHash: "6eb92c6a1ff075525502a0b84470debe6eb92c6a1ff075525502a0b84470debe",
+		},
 	}
-	if err != nil {
-		t.Error("Error creating new Identicon struct ", err)
-	}
+	for _, test := range testSet {
+		icon, err := identicon.New(test.identifier)
 
-	if ic.ID != id {
-		t.Error("ID error: expected", id, ", got ", ic.ID)
-	}
-
-	if ic.HashString() != "661f8009fa8e56a9d0e94a0a644397d7" {
-		t.Error("MD5 error: expected 661f8009fa8e56a9d0e94a0a644397d7, got ", ic.HashString())
+		assert.NoError(t, err)
+		assert.Equal(t, test.expectedHash, icon.HashString(), fmt.Sprintf("given: %s", test.identifier))
 	}
 }
 
-func TestGernerate(t *testing.T) {
-	ic, _ := New(id, &Options{
-		BackgroundColor: RGB(235, 235, 235),
-		ImageSize:       100,
-		Debug:           true,
-	})
+func TestMatrixIsCorrect(t *testing.T) {
 
-	f, err := os.Open("example/images/" + id + ".png")
-	if err != nil {
-		panic("Could not open proof file: " + err.Error())
+	// TODO: test different resolutions
+
+	testSet := []struct {
+		identifier     string
+		expectedMatrix [][]bool
+	}{
+		{
+			identifier: "my-test",
+			expectedMatrix: [][]bool{
+				{true, false, true, true, true},
+				{false, true, false, false, true},
+				{true, true, false, false, true},
+				{false, true, false, false, true},
+				{true, false, true, true, true},
+			},
+		},
+		{
+			identifier: "0",
+			expectedMatrix: [][]bool{
+				{true, false, false, false, false},
+				{false, false, true, true, true},
+				{true, false, false, true, false},
+				{false, false, true, true, true},
+				{true, false, false, false, false},
+			},
+		},
+		{
+			identifier: "my-second-test-is-a-lot-larger-than-the-first-test-i-swear",
+			expectedMatrix: [][]bool{
+				{true, false, false, true, true},
+				{false, false, true, false, true},
+				{false, false, false, false, true},
+				{false, false, true, false, true},
+				{true, false, false, true, true},
+			},
+		},
 	}
-	defer f.Close()
+	for _, test := range testSet {
+		icon, err := identicon.New(test.identifier)
 
-	proof, err := png.Decode(f)
-	if err != nil {
-		panic("Could not decode proof file: " + err.Error())
-	}
-
-	if ic.Bounds() != proof.Bounds() {
-		t.Error("Generated image dimensions differ from proof file")
-	}
-
-	var diff bool
-
-LOOP:
-	for x := 0; x < proof.Bounds().Dx(); x++ {
-		for y := 0; y < proof.Bounds().Dy(); y++ {
-
-			genR, genG, genB, genA := ic.At(x, y).RGBA()
-			proR, proG, proB, proA := proof.At(x, y).RGBA()
-
-			// genR, genG, genB, genA := uint8(genR32), uint8(genG32), uint8(genB32), uint8(genA32)
-			// proR, proG, proB, proA := uint8(proR32), uint8(proG32), uint8(proB32), uint8(proA32)
-
-			if genR != proR || genG != proG || genB != proB || genA != proA {
-				// e := fmt.Sprintf("Compare error at %d:%d", x, y)
-				// t.Error(e)
-				// fmt.Println("X:Y ", x, y, " || ", genR, genG, genB, genA, "||", proR, proG, proB, proA)
-				diff = true
-				break LOOP
-			}
-		}
-	}
-
-	if diff {
-		t.Error("Generated image not identical to proof file")
+		assert.NoError(t, err)
+		assert.Equal(t, test.expectedMatrix, icon.Matrix(), fmt.Sprintf("given: %s", test.identifier))
 	}
 }
 
-func TestOutOfBounds(t *testing.T) {
-	ic, _ := New(id, &Options{
-		BackgroundColor: RGB(235, 235, 235),
-		ImageSize:       100,
-	})
-
-	blank := color.NRGBA{}
-	if ic.NRGBAAt(-1, -1) != blank || ic.NRGBAAt(101, 101) != blank {
-		t.Error("OOB NRGBAAt")
+func ExampleNew() {
+	icon, err := identicon.New("michael@example.com")
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	for _, val := range ic.Pix {
-		if val == 0 {
-			t.Error("OOB Set test incomplete, there already are black pixels")
-			break
-		}
+	file, err := os.Create("identicon.png")
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	ic.Set(-1, -1, blank)
-	ic.Set(101, 101, blank)
+	err = png.Encode(file, icon)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	for _, val := range ic.Pix {
-		if val == 0 {
-			t.Error("OOB Set should not succeed, but did")
-			break
-		}
+	file.Close()
+	// // Output:
+}
+
+func BenchmarkNew(b *testing.B) {
+	for i := 0; i <= b.N; i++ {
+		identicon.New(identifier)
+	}
+}
+
+func BenchmarkNewV0(b *testing.B) {
+	for i := 0; i <= b.N; i++ {
+		v0.New(identifier, nil)
 	}
 }
