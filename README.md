@@ -45,7 +45,7 @@ if err != nil {
 }
 ```
 
-`Identicon` implements Go's `image.Image`, so you can use the result durectly to encode it as an image file:
+`Identicon` implements Go's `image.Image`, so you can use the result directly to encode it as an image file:
 
 ```go
 file, err := os.Create("identicon-gary.png")
