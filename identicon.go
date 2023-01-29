@@ -40,11 +40,20 @@ func New(identifier string, opts ...Option) (*Identicon, error) {
 		options:    DefaultOptions(),
 	}
 
+	ic.applyOptions(opts...)
 	ic.initBounds()
 	ic.initPixels()
+	ic.computeHash()
+	ic.computeMatrix()
+
+	return ic, nil
+}
+
+func (ic *Identicon) applyOptions(opts ...Option) {
 	for _, opt := range opts {
 		opt(ic)
 	}
+}
 
 func (ic *Identicon) initBounds() {
 	ic.bounds = image.Rectangle{
@@ -56,17 +65,19 @@ func (ic *Identicon) initBounds() {
 func (ic *Identicon) initPixels() {
 	ic.pixels = make([]uint8, 4*ic.bounds.Dx()*ic.bounds.Dy())
 }
+
+func (ic *Identicon) computeHash() {
 	// TODO: mandatoryByteAmount is often too large; debug with resolution=11
 	tileAmount := ic.options.GridResolution * ic.options.GridResolution
 	mandatoryByteAmount := tileAmount / 2
-	even := tileAmount%2 == 0
+	resolutionIsEven := tileAmount%2 == 0
 
 	// fmt.Println(tileAmount, mandatoryByteAmount)
-	if !even {
+	if !resolutionIsEven {
 		mandatoryByteAmount += ic.options.GridResolution
 	}
 	// fmt.Println(tileAmount, mandatoryByteAmount)
-	sum := hashSum([]byte(identifier))
+	sum := hashSum([]byte(ic.Identifier))
 
 	for len(sum) < mandatoryByteAmount {
 		sum = append(sum, sum...)
@@ -74,9 +85,40 @@ func (ic *Identicon) initPixels() {
 
 	// fmt.Println(len(sum), mandatoryByteAmount)
 	ic.hash = sum
-	ic.matrix = computeMatrix(sum, ic.options.GridResolution)
+}
 
-	return ic, nil
+func (ic *Identicon) computeMatrix() {
+
+	matrix := make([][]bool, ic.options.GridResolution)
+	even := ic.options.GridResolution%2 == 0
+	half := int(ic.options.GridResolution / 2)
+
+	// Columns
+	for col := 0; col < ic.options.GridResolution; col++ {
+
+		// Middle col
+		if col > half-1 {
+			if even {
+				break
+			}
+
+			if col == half {
+				matrix[col] = createColumn(col, ic.hash, ic.options.GridResolution, false)
+			}
+
+			continue
+		}
+
+		// First half
+		matrix[col] = createColumn(col, ic.hash, ic.options.GridResolution, false)
+
+		// Replicate to second half
+		colMax := len(matrix) - 1
+		mirroredColNum := colMax - col
+		matrix[mirroredColNum] = createColumn(mirroredColNum, ic.hash, ic.options.GridResolution, true)
+	}
+
+	ic.matrix = matrix
 }
 
 // Options returns the identicons options.
@@ -132,7 +174,7 @@ func (ic *Identicon) pixelOffset(x, y int) int {
 	return (y-ic.bounds.Min.Y)*ic.stride + (x-ic.bounds.Min.X)*4
 }
 
-func computeColumn(colNum int, hash []byte, resolution int, secondHalf bool) []bool {
+func createColumn(colNum int, hash []byte, resolution int, secondHalf bool) []bool {
 
 	col := make([]bool, resolution)
 
