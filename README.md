@@ -4,10 +4,10 @@
 
 ![Latest Release Version][shields-version-img]
 [![Godoc][godoc-image]][godoc-url]
-![Build Status](https://github.com/tsdtsdtsd/identicon/actions/workflows/ci.yml/badge.svg?branch=rewrite)
+![Build Status](https://github.com/tsdtsdtsd/identicon/actions/workflows/ci.yml/badge.svg)
 [![Go Report Card][grc-image]][grc-url]
 [![codecov][codecov-image]][codecov-url]
-[![CodeQL](https://github.com/tsdtsdtsd/identicon/actions/workflows/codeql-analysis.yml/badge.svg?branch=master)](https://github.com/tsdtsdtsd/identicon/actions/workflows/codeql-analysis.yml)
+[![CodeQL](https://github.com/tsdtsdtsd/identicon/actions/workflows/codeql-analysis.yml/badge.svg?branch=main)](https://github.com/tsdtsdtsd/identicon/actions/workflows/codeql-analysis.yml)
 
 This Go library helps to generate deterministic [Identicons][identicon-wiki] from strings.
 
@@ -77,7 +77,7 @@ You can find another example in the /_example folder. It contains an application
 [grc-url]: https://goreportcard.com/report/github.com/tsdtsdtsd/identicon
 [godoc-image]: https://pkg.go.dev/badge/github.com/tsdtsdtsd/identicon.svg
 [godoc-url]: https://pkg.go.dev/github.com/tsdtsdtsd/identicon
-[codecov-image]: https://codecov.io/gh/tsdtsdtsd/identicon/branch/rewrite/graph/badge.svg
-[codecov-url]: https://codecov.io/gh/tsdtsdtsd/identicon/tree/rewrite
+[codecov-image]: https://codecov.io/gh/tsdtsdtsd/identicon/branch/main/graph/badge.svg
+[codecov-url]: https://codecov.io/gh/tsdtsdtsd/identicon/tree/main
 [shields-version-img]: https://img.shields.io/github/v/release/tsdtsdtsd/identicon
 [identicon-wiki]: https://en.wikipedia.org/wiki/Identicon
