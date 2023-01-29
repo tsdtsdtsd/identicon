@@ -113,6 +113,52 @@ func TestWithGridResolutionNonPositiveValueShouldBeDiscarded(t *testing.T) {
 	})
 }
 
+func TestWithImageSizeShouldSetOption(t *testing.T) {
+
+	size := 60
+	defaultOptions := identicon.DefaultOptions()
+	defaultOptions.ImageSize = size
+
+	icon, err := identicon.New(
+		identifier,
+		identicon.WithImageSize(size),
+	)
+
+	assert.NotNil(t, icon)
+	assert.NoError(t, err)
+	assert.Equal(t, defaultOptions, icon.Options())
+}
+
+func TestWithImageSizeNonPositiveValueShouldBeDiscarded(t *testing.T) {
+
+	defaultOptions := identicon.DefaultOptions()
+
+	t.Run("zero given", func(t *testing.T) {
+		size := 0
+
+		icon, err := identicon.New(
+			identifier,
+			identicon.WithImageSize(size),
+		)
+
+		assert.NotNil(t, icon)
+		assert.NoError(t, err)
+		assert.Equal(t, defaultOptions, icon.Options())
+	})
+
+	t.Run("negative given", func(t *testing.T) {
+		size := -5
+
+		icon, err := identicon.New(
+			identifier,
+			identicon.WithImageSize(size),
+		)
+
+		assert.NotNil(t, icon)
+		assert.NoError(t, err)
+		assert.Equal(t, defaultOptions, icon.Options())
+	})
+}
 func TestHashHasTheExpectedValue(t *testing.T) {
 
 	testSet := []struct {
