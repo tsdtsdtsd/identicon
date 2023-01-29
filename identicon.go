@@ -6,6 +6,7 @@ import (
 	"errors"
 	"image"
 	"image/color"
+	"image/draw"
 )
 
 // Identicon defines an identicon
@@ -41,10 +42,10 @@ func New(identifier string, opts ...Option) (*Identicon, error) {
 	}
 
 	ic.applyOptions(opts...)
-	ic.initBounds()
-	ic.initPixels()
+	ic.initImage()
 	ic.computeHash()
 	ic.computeMatrix()
+	ic.draw()
 
 	return ic, nil
 }
@@ -55,15 +56,14 @@ func (ic *Identicon) applyOptions(opts ...Option) {
 	}
 }
 
-func (ic *Identicon) initBounds() {
+func (ic *Identicon) initImage() {
 	ic.bounds = image.Rectangle{
 		Min: image.Point{0, 0},
 		Max: image.Point{ic.options.ImageSize, ic.options.ImageSize},
 	}
-}
 
-func (ic *Identicon) initPixels() {
 	ic.pixels = make([]uint8, 4*ic.bounds.Dx()*ic.bounds.Dy())
+	ic.stride = 4 * ic.options.ImageSize
 }
 
 func (ic *Identicon) computeHash() {
@@ -79,6 +79,7 @@ func (ic *Identicon) computeHash() {
 	// fmt.Println(tileAmount, mandatoryByteAmount)
 	sum := hashSum([]byte(ic.Identifier))
 
+	// TODO: need better idea for workaround - this ends up in strange and repeated patterns if gridres is >8
 	for len(sum) < mandatoryByteAmount {
 		sum = append(sum, sum...)
 	}
@@ -119,6 +120,49 @@ func (ic *Identicon) computeMatrix() {
 	}
 
 	ic.matrix = matrix
+}
+
+func (ic *Identicon) draw() {
+
+	// Last 3 bytes of hash are the RGB values
+	// TODO: too random? custom palette?
+	hashLength := len(ic.hash)
+	fgColor := color.NRGBA{
+		R: uint8(ic.hash[hashLength-1]),
+		G: uint8(ic.hash[hashLength-2]),
+		B: uint8(ic.hash[hashLength-3]),
+		A: uint8(255),
+	}
+
+	// Background fill
+	draw.Draw(ic, ic.Bounds(), &image.Uniform{ic.options.BGColor}, image.Point{}, draw.Src)
+
+	// Iterate tiles and draw
+	for colOffset, col := range ic.matrix {
+		for rowOffset, tileIsSet := range col {
+			if tileIsSet {
+				ic.drawTile(colOffset, rowOffset, fgColor)
+			}
+		}
+	}
+}
+
+func (ic *Identicon) drawTile(colOffset, rowOffset int, fgColor color.Color) {
+
+	colStart := (colOffset * (ic.options.ImageSize / ic.options.GridResolution))
+	colEnd := colStart + (ic.options.ImageSize / ic.options.GridResolution)
+
+	rowStart := (rowOffset * (ic.options.ImageSize / ic.options.GridResolution))
+	rowEnd := rowStart + (ic.options.ImageSize / ic.options.GridResolution)
+
+	draw.Draw(
+		ic,
+		image.Rect(colStart, rowStart, colEnd, rowEnd),
+		&image.Uniform{fgColor},
+		image.Point{},
+		draw.Src,
+	)
+
 }
 
 // Options returns the identicons options.
@@ -182,11 +226,13 @@ func (ic *Identicon) Set(x, y int, c color.Color) {
 
 	i := ic.pixelOffset(x, y)
 	c1 := ic.ColorModel().Convert(c).(color.NRGBA)
+
 	ic.pixels[i+0] = c1.R
 	ic.pixels[i+1] = c1.G
 	ic.pixels[i+2] = c1.B
 	ic.pixels[i+3] = c1.A
 }
+
 func createColumn(colNum int, hash []byte, resolution int, secondHalf bool) []bool {
 
 	col := make([]bool, resolution)
