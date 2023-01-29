@@ -4,7 +4,7 @@ import "image/color"
 
 // Options define customizable settings
 type Options struct {
-	BGColor        color.NRGBA
+	BGColor        color.Color
 	GridResolution int
 	ImageSize      int
 }
@@ -22,7 +22,7 @@ func DefaultOptions() *Options {
 }
 
 // WithBGColor returns an option that sets the identicon's background color to given color.
-func WithBGColor(c color.NRGBA) Option {
+func WithBGColor(c color.Color) Option {
 	return func(i *Identicon) {
 		i.options.BGColor = c
 	}
