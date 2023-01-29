@@ -3,6 +3,9 @@ package identicon_test
 import (
 	"fmt"
 	"image/color"
+	"image/png"
+	"log"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -182,6 +185,26 @@ func TestMatrixIsCorrect(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, test.expectedMatrix, icon.Matrix(), fmt.Sprintf("given: %s", test.identifier))
 	}
+}
+
+func ExampleNew() {
+	icon, err := identicon.New("michael@example.com")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	file, err := os.Create("identicon.png")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = png.Encode(file, icon)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	file.Close()
+	// // Output:
 }
 
 func BenchmarkNew(b *testing.B) {

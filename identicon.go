@@ -4,6 +4,8 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"errors"
+	"image"
+	"image/color"
 )
 
 // Identicon defines an identicon
@@ -12,6 +14,12 @@ type Identicon struct {
 	options    *Options
 	matrix     [][]bool // first dimension is columns, second is rows
 	hash       []byte
+	bounds     image.Rectangle
+	// pixels holds the image's pixels, in R, G, B, A order. The pixel at
+	// (x, y) starts at Pix[(y-Rect.Min.Y)*Stride + (x-Rect.Min.X)*4].
+	pixels []uint8
+	// stride is the pixel stride (in bytes) between vertically adjacent pixels.
+	stride int
 }
 
 var hasher = md5.New()
@@ -32,11 +40,22 @@ func New(identifier string, opts ...Option) (*Identicon, error) {
 		options:    DefaultOptions(),
 	}
 
-	// Apply options
+	ic.initBounds()
+	ic.initPixels()
 	for _, opt := range opts {
 		opt(ic)
 	}
 
+func (ic *Identicon) initBounds() {
+	ic.bounds = image.Rectangle{
+		Min: image.Point{0, 0},
+		Max: image.Point{ic.options.ImageSize, ic.options.ImageSize},
+	}
+}
+
+func (ic *Identicon) initPixels() {
+	ic.pixels = make([]uint8, 4*ic.bounds.Dx()*ic.bounds.Dy())
+}
 	// TODO: mandatoryByteAmount is often too large; debug with resolution=11
 	tileAmount := ic.options.GridResolution * ic.options.GridResolution
 	mandatoryByteAmount := tileAmount / 2
@@ -81,38 +100,36 @@ func hashSum(in []byte) []byte {
 	return hasher.Sum(nil)
 }
 
-func computeMatrix(hash []byte, resolution int) [][]bool {
+// At returns the color of the pixel at (x, y).
+// At(Bounds().Min.X, Bounds().Min.Y) returns the upper-left pixel of the grid.
+// At(Bounds().Max.X-1, Bounds().Max.Y-1) returns the lower-right one.
+func (ic *Identicon) At(x, y int) color.Color {
+	return ic.NRGBAAt(x, y)
+}
 
-	matrix := make([][]bool, resolution)
-	even := resolution%2 == 0
-	half := int(resolution / 2)
-
-	// Columns
-	for col := 0; col < resolution; col++ {
-
-		// Middle col
-		if col > half-1 {
-			if even {
-				break
-			}
-
-			if col == half {
-				matrix[col] = computeColumn(col, hash, resolution, false)
-			}
-
-			continue
-		}
-
-		// First half
-		matrix[col] = computeColumn(col, hash, resolution, false)
-
-		// Replicate to second half
-		colMax := len(matrix) - 1
-		mirroredColNum := colMax - col
-		matrix[mirroredColNum] = computeColumn(mirroredColNum, hash, resolution, true)
+// NRGBAAt returns the color of the pixel at (x, y) as color.NRGBA.
+func (ic *Identicon) NRGBAAt(x, y int) color.NRGBA {
+	if !(image.Point{x, y}.In(ic.bounds)) {
+		return color.NRGBA{}
 	}
+	i := ic.pixelOffset(x, y)
+	return color.NRGBA{ic.pixels[i+0], ic.pixels[i+1], ic.pixels[i+2], ic.pixels[i+3]}
+}
 
-	return matrix
+// Bounds returns the domain for which At can return non-zero color.
+func (ic *Identicon) Bounds() image.Rectangle {
+	return ic.bounds
+}
+
+// ColorModel returns the Image's color model.
+func (ic *Identicon) ColorModel() color.Model {
+	return color.NRGBAModel
+}
+
+// PixOffset returns the index of the first element of Pix that corresponds to
+// the pixel at (x, y).
+func (ic *Identicon) pixelOffset(x, y int) int {
+	return (y-ic.bounds.Min.Y)*ic.stride + (x-ic.bounds.Min.X)*4
 }
 
 func computeColumn(colNum int, hash []byte, resolution int, secondHalf bool) []bool {
