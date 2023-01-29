@@ -174,6 +174,19 @@ func (ic *Identicon) pixelOffset(x, y int) int {
 	return (y-ic.bounds.Min.Y)*ic.stride + (x-ic.bounds.Min.X)*4
 }
 
+// Set stores given color at position (x, y).
+func (ic *Identicon) Set(x, y int, c color.Color) {
+	if !(image.Point{x, y}.In(ic.bounds)) {
+		return
+	}
+
+	i := ic.pixelOffset(x, y)
+	c1 := ic.ColorModel().Convert(c).(color.NRGBA)
+	ic.pixels[i+0] = c1.R
+	ic.pixels[i+1] = c1.G
+	ic.pixels[i+2] = c1.B
+	ic.pixels[i+3] = c1.A
+}
 func createColumn(colNum int, hash []byte, resolution int, secondHalf bool) []bool {
 
 	col := make([]bool, resolution)
