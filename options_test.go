@@ -15,7 +15,7 @@ func TestDefaultOptions(t *testing.T) {
 	expected := &identicon.Options{
 		BGColor:        color.NRGBA{240, 240, 240, 255},
 		GridResolution: 5,
-		ImageSize:      120,
+		ImageSize:      100,
 	}
 	got := identicon.DefaultOptions()
 

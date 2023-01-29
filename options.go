@@ -17,7 +17,7 @@ func DefaultOptions() *Options {
 	return &Options{
 		BGColor:        color.NRGBA{240, 240, 240, 255},
 		GridResolution: 5,
-		ImageSize:      120,
+		ImageSize:      100,
 	}
 }
 
