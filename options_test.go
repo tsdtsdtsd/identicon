@@ -15,6 +15,7 @@ func TestDefaultOptions(t *testing.T) {
 	expected := &identicon.Options{
 		BGColor:        color.NRGBA{240, 240, 240, 255},
 		GridResolution: 5,
+		ImageSize:      120,
 	}
 	got := identicon.DefaultOptions()
 
@@ -32,4 +33,17 @@ func TestWithBGColorOption(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Equal(t, red, got)
+}
+
+func TestWithImageSizeOption(t *testing.T) {
+
+	size := 200
+	optionFunc := identicon.WithImageSize(size)
+	icon, err := identicon.New("id")
+
+	optionFunc(icon)
+	got := icon.Options().ImageSize
+
+	assert.NoError(t, err)
+	assert.Equal(t, size, got)
 }
