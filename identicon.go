@@ -225,12 +225,12 @@ func (ic *Identicon) Set(x, y int, c color.Color) {
 	}
 
 	i := ic.pixelOffset(x, y)
-	c1 := ic.ColorModel().Convert(c).(color.NRGBA)
+	cNRGBA := ic.ColorModel().Convert(c).(color.NRGBA)
 
-	ic.pixels[i+0] = c1.R
-	ic.pixels[i+1] = c1.G
-	ic.pixels[i+2] = c1.B
-	ic.pixels[i+3] = c1.A
+	ic.pixels[i+0] = cNRGBA.R
+	ic.pixels[i+1] = cNRGBA.G
+	ic.pixels[i+2] = cNRGBA.B
+	ic.pixels[i+3] = cNRGBA.A
 }
 
 func createColumn(colNum int, hash []byte, resolution int, secondHalf bool) []bool {
