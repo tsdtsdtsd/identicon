@@ -21,8 +21,8 @@ It will definitely break the API and most probably also the internal hashing alg
 <!-- Markdown link & img dfn's -->
 [grc-image]: https://goreportcard.com/badge/github.com/tsdtsdtsd/identicon
 [grc-url]: https://goreportcard.com/report/github.com/tsdtsdtsd/identicon
-[godoc-image]: https://godoc.org/github.com/tsdtsdtsd/identicon?status.svg
-[godoc-url]: https://godoc.org/github.com/tsdtsdtsd/identicon
+[godoc-image]: https://pkg.go.dev/badge/github.com/tsdtsdtsd/identicon.svg
+[godoc-url]: https://pkg.go.dev/github.com/tsdtsdtsd/identicon
 [codecov-image]: https://codecov.io/gh/tsdtsdtsd/identicon/branch/rewrite/graph/badge.svg
 [codecov-url]: https://codecov.io/gh/tsdtsdtsd/identicon/tree/rewrite
 [shields-version-img]: https://img.shields.io/github/v/release/tsdtsdtsd/identicon
