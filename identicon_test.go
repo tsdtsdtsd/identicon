@@ -10,7 +10,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/tsdtsdtsd/identicon"
-	v0 "github.com/tsdtsdtsd/identicon-v0"
 )
 
 var identifier = "my-test-identifier"
@@ -234,7 +233,7 @@ func TestMatrixIsCorrect(t *testing.T) {
 }
 
 func ExampleNew() {
-	icon, err := identicon.New("michael@example.com")
+	icon, err := identicon.New("michael@example.com", identicon.WithBGColor(color.RGBA{220, 220, 220, 255}))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -250,17 +249,11 @@ func ExampleNew() {
 	}
 
 	file.Close()
-	// // Output:
+	// Output:
 }
 
 func BenchmarkNew(b *testing.B) {
 	for i := 0; i <= b.N; i++ {
 		identicon.New(identifier)
-	}
-}
-
-func BenchmarkNewV0(b *testing.B) {
-	for i := 0; i <= b.N; i++ {
-		v0.New(identifier, nil)
 	}
 }
