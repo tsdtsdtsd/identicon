@@ -9,8 +9,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	v0 "github.com/tsdtsdtsd/identicon"
-	"github.com/tsdtsdtsd/identicon/v1"
+	"github.com/tsdtsdtsd/identicon"
+	v0 "github.com/tsdtsdtsd/identicon-v0"
 )
 
 var identifier = "my-test-identifier"

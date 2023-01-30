@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/tsdtsdtsd/identicon/v1"
+	"github.com/tsdtsdtsd/identicon"
 )
 
 func TestDefaultOptions(t *testing.T) {
