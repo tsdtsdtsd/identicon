@@ -25,7 +25,7 @@ It will definitely break the API and most probably also the internal hashing alg
 Get it:
 
 ```sh
-go get github.com/tsdtsdtsd/identicon/v1
+go get github.com/tsdtsdtsd/identicon
 ```
 
 Create a new identicon:
