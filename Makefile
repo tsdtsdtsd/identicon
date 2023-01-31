@@ -15,7 +15,7 @@ all: help
 
 ## Test:
 test: ## Run all tests
-	$(GOTEST) -v -race ./...
+	$(GOTEST) -v -race ./... --cover
 	
 cover: ## Run tests and open coverage in browser
 	$(GOTEST) -v -coverpkg=./... -covermode=atomic -coverprofile=$(COVERFILE) ./...
