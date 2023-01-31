@@ -1,13 +1,16 @@
 package identicon
 
 import (
-	"crypto/md5"
 	"encoding/hex"
 	"errors"
+	"hash"
 	"image"
 	"image/color"
 	"image/draw"
 )
+
+// stride is the pixel stride (in bytes) between vertically adjacent pixels.
+const stride int = 4
 
 // Identicon defines an identicon
 type Identicon struct {
@@ -17,15 +20,9 @@ type Identicon struct {
 	hash       []byte
 	bounds     image.Rectangle
 	// pixels holds the image's pixels, in R, G, B, A order. The pixel at
-	// (x, y) starts at Pix[(y-Rect.Min.Y)*Stride + (x-Rect.Min.X)*4].
+	// (x, y) starts at pixels[(y-Rect.Min.Y)*stride*imgWidth + (x-Rect.Min.X)*stride].
 	pixels []uint8
-	// stride is the pixel stride (in bytes) between vertically adjacent pixels.
-	stride int
 }
-
-var hasher = md5.New()
-
-// var hasher = fnv.New128a()
 
 // New returns the identicon for given identifier.
 // Additional options can specify the identicon.
@@ -63,7 +60,6 @@ func (ic *Identicon) initImage() {
 	}
 
 	ic.pixels = make([]uint8, 4*ic.bounds.Dx()*ic.bounds.Dy())
-	ic.stride = 4 * ic.options.ImageSize
 }
 
 func (ic *Identicon) computeHash() {
@@ -77,7 +73,7 @@ func (ic *Identicon) computeHash() {
 		mandatoryByteAmount += ic.options.GridResolution
 	}
 	// fmt.Println(tileAmount, mandatoryByteAmount)
-	sum := hashSum([]byte(ic.Identifier))
+	sum := hashSum(ic.options.Hasher, []byte(ic.Identifier))
 
 	// TODO: need better idea for workaround - this ends up in strange and repeated patterns if gridres is >8
 	for len(sum) < mandatoryByteAmount {
@@ -180,7 +176,7 @@ func (ic *Identicon) HashString() string {
 	return hex.EncodeToString(ic.hash)
 }
 
-func hashSum(in []byte) []byte {
+func hashSum(hasher hash.Hash, in []byte) []byte {
 	hasher.Reset()
 	hasher.Write(in)
 	return hasher.Sum(nil)
@@ -212,10 +208,10 @@ func (ic *Identicon) ColorModel() color.Model {
 	return color.NRGBAModel
 }
 
-// PixOffset returns the index of the first element of Pix that corresponds to
+// PixOffset returns the index of the first element of pixels that corresponds to
 // the pixel at (x, y).
 func (ic *Identicon) pixelOffset(x, y int) int {
-	return (y-ic.bounds.Min.Y)*ic.stride + (x-ic.bounds.Min.X)*4
+	return (y-ic.bounds.Min.Y)*stride*ic.options.ImageSize + (x-ic.bounds.Min.X)*4
 }
 
 // Set stores given color at position (x, y).
