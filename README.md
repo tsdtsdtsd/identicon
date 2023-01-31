@@ -1,6 +1,6 @@
 # Identicon
 
-> A Go library for Identicon generation
+> A golang library for Identicon generation
 
 ![Latest Release Version][shields-version-img]
 [![Godoc][godoc-image]][godoc-url]
@@ -9,7 +9,7 @@
 [![codecov][codecov-image]][codecov-url]
 [![CodeQL](https://github.com/tsdtsdtsd/identicon/actions/workflows/codeql-analysis.yml/badge.svg?branch=main)](https://github.com/tsdtsdtsd/identicon/actions/workflows/codeql-analysis.yml)
 
-This Go library helps to generate deterministic [Identicons][identicon-wiki] from strings.
+This Go library helps to generate deterministic [Identicons][identicon-wiki] from strings, like these:
 
 ![Example Banner](_example/bannercreator/identicon-banner.png "Example Banner")
 
@@ -22,13 +22,13 @@ It will definitely break the API and also the internal hashing algorithm, so ide
 
 ## Usage:
 
-Get it:
+1. Get it:
 
 ```sh
 go get github.com/tsdtsdtsd/identicon
 ```
 
-Create a new identicon:
+2. Create a new identicon:
 
 ```go
 red := color.RGBA{255, 0, 0, 255}
@@ -46,7 +46,9 @@ if err != nil {
 }
 ```
 
-`Identicon` implements Go's `image.Image`, so you can use the result directly to encode it as an image file:
+3. Create an image:
+
+   `Identicon` implements Go's `image.Image`, so you can use the result directly to encode it as an image file:
 
 ```go
 file, err := os.Create("identicon-gary.png")
@@ -62,7 +64,7 @@ if err != nil {
 file.Close()
 ```
 
-As it also implements Go's `draw.Image`, you can use it to change the output further:
+Identicon also implements Go's `draw.Image`, you can use it to change the output further:
 
 ```go
     // TODO: example 
