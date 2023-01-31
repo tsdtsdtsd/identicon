@@ -52,6 +52,11 @@ func (ic *Identicon) applyOptions(opts ...Option) {
 }
 
 func (ic *Identicon) initImage() {
+
+	// TODO: for cropping strategy,
+	// bounds and pixels need to be calculated based on
+	// tile amount, tile size, grid width
+
 	ic.bounds = image.Rectangle{
 		Min: image.Point{0, 0},
 		Max: image.Point{ic.options.ImageSize, ic.options.ImageSize},
@@ -62,12 +67,12 @@ func (ic *Identicon) initImage() {
 
 func (ic *Identicon) computeHash() {
 	// TODO: mandatoryByteAmount is often too large; debug with resolution=11
-	tileAmount := ic.options.GridResolution * ic.options.GridResolution
+	tileAmount := ic.options.Resolution * ic.options.Resolution
 	mandatoryByteAmount := tileAmount / 2
 	resolutionIsEven := tileAmount%2 == 0
 
 	if !resolutionIsEven {
-		mandatoryByteAmount += ic.options.GridResolution
+		mandatoryByteAmount += ic.options.Resolution
 	}
 
 	sum := hashSum(ic.options.Hasher, []byte(ic.Identifier))
@@ -82,12 +87,12 @@ func (ic *Identicon) computeHash() {
 
 func (ic *Identicon) computeMatrix() {
 
-	matrix := make([][]bool, ic.options.GridResolution)
-	even := ic.options.GridResolution%2 == 0
-	half := int(ic.options.GridResolution / 2)
+	matrix := make([][]bool, ic.options.Resolution)
+	even := ic.options.Resolution%2 == 0
+	half := int(ic.options.Resolution / 2)
 
 	// Columns
-	for col := 0; col < ic.options.GridResolution; col++ {
+	for col := 0; col < ic.options.Resolution; col++ {
 
 		// Middle col
 		if col > half-1 {
@@ -96,19 +101,19 @@ func (ic *Identicon) computeMatrix() {
 			}
 
 			if col == half {
-				matrix[col] = createColumn(col, ic.hash, ic.options.GridResolution, false)
+				matrix[col] = createColumn(col, ic.hash, ic.options.Resolution, false)
 			}
 
 			continue
 		}
 
 		// First half
-		matrix[col] = createColumn(col, ic.hash, ic.options.GridResolution, false)
+		matrix[col] = createColumn(col, ic.hash, ic.options.Resolution, false)
 
 		// Mirror to second half
 		colMax := len(matrix) - 1
 		mirroredColNum := colMax - col
-		matrix[mirroredColNum] = createColumn(mirroredColNum, ic.hash, ic.options.GridResolution, true)
+		matrix[mirroredColNum] = createColumn(mirroredColNum, ic.hash, ic.options.Resolution, true)
 	}
 
 	ic.matrix = matrix
@@ -144,11 +149,11 @@ func (ic *Identicon) draw() {
 
 func (ic *Identicon) drawTile(colOffset, rowOffset int, fgColor color.Color) {
 
-	colStart := (colOffset * (ic.options.ImageSize / ic.options.GridResolution))
-	colEnd := colStart + (ic.options.ImageSize / ic.options.GridResolution)
+	colStart := (colOffset * (ic.options.ImageSize / ic.options.Resolution))
+	colEnd := colStart + (ic.options.ImageSize / ic.options.Resolution)
 
-	rowStart := (rowOffset * (ic.options.ImageSize / ic.options.GridResolution))
-	rowEnd := rowStart + (ic.options.ImageSize / ic.options.GridResolution)
+	rowStart := (rowOffset * (ic.options.ImageSize / ic.options.Resolution))
+	rowEnd := rowStart + (ic.options.ImageSize / ic.options.Resolution)
 
 	draw.Draw(
 		ic,

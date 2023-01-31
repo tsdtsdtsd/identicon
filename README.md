@@ -31,15 +31,17 @@ go get github.com/tsdtsdtsd/identicon
 2. Create a new identicon:
 
 ```go
+black := color.RGBA{0, 0, 0, 255}
 red := color.RGBA{255, 0, 0, 255}
 
 icon, err := identicon.New(
     "gary@example.com", 
     // optional:
-    identicon.WithGridResolution(7),  // default: 5
-    identicon.WithImageSize(200),     // default: 100
-    identicon.WithBGColor(red),       // default: light gray R:240 G:240 B:240 A:255 (#f0f0f0)
-    identicon.WithHasher(sha1.New()), // default fnv128
+    identicon.WithResolution(7),      // default: 5
+    identicon.WithImageSize(210),     // default: 100
+    identicon.WithBGColor(black),     // default: light gray R:240 G:240 B:240 A:255 (#f0f0f0)
+    identicon.WithFGColor(red),       // default: based on identifier
+    identicon.WithHasher(sha1.New()), // default: fnv128
 )
 if err != nil {
     log.Fatal(err)

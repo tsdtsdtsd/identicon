@@ -8,11 +8,11 @@ import (
 
 // Options define customizable settings
 type Options struct {
-	GridResolution int
-	ImageSize      int
-	Hasher         hash.Hash
-	BGColor        color.Color
-	FGColor        color.Color
+	Resolution int
+	ImageSize  int
+	Hasher     hash.Hash
+	BGColor    color.Color
+	FGColor    color.Color
 }
 
 // Option changes a single option
@@ -21,10 +21,10 @@ type Option func(*Identicon)
 // DefaultOptions are the baseline for a new identicon
 func DefaultOptions() *Options {
 	return &Options{
-		BGColor:        color.NRGBA{240, 240, 240, 255},
-		GridResolution: 5,
-		ImageSize:      100,
-		Hasher:         fnv.New128(),
+		BGColor:    color.NRGBA{240, 240, 240, 255},
+		Resolution: 5,
+		ImageSize:  100,
+		Hasher:     fnv.New128(),
 	}
 }
 
@@ -42,15 +42,15 @@ func WithFGColor(c color.Color) Option {
 	}
 }
 
-// WithGridResolution returns an option that sets the identicon's grid resolution to given amount.
+// WithResolution returns an option that sets the identicon's grid resolution to given amount.
 // The option will be discarded silently if given value is non-positive.
-func WithGridResolution(resolution int) Option {
+func WithResolution(resolution int) Option {
 	return func(i *Identicon) {
 		if resolution <= 0 {
 			return
 		}
 
-		i.options.GridResolution = resolution
+		i.options.Resolution = resolution
 	}
 }
 

@@ -90,16 +90,16 @@ func TestWithFGColorShouldSetOption(t *testing.T) {
 	assert.Equal(t, defaultOptions, icon.Options())
 }
 
-func TestWithGridResolutionShouldSetOption(t *testing.T) {
+func TestWithResolutionShouldSetOption(t *testing.T) {
 
 	resolution := 8
 	defaultOptions := identicon.DefaultOptions()
-	defaultOptions.GridResolution = resolution
+	defaultOptions.Resolution = resolution
 	defaultOptions.Hasher = hasher
 
 	icon, err := identicon.New(
 		identifier,
-		identicon.WithGridResolution(resolution),
+		identicon.WithResolution(resolution),
 		identicon.WithHasher(hasher),
 	)
 
@@ -108,7 +108,7 @@ func TestWithGridResolutionShouldSetOption(t *testing.T) {
 	assert.Equal(t, defaultOptions, icon.Options())
 }
 
-func TestWithGridResolutionNonPositiveValueShouldBeDiscarded(t *testing.T) {
+func TestWithResolutionNonPositiveValueShouldBeDiscarded(t *testing.T) {
 
 	defaultOptions := identicon.DefaultOptions()
 	defaultOptions.Hasher = hasher
@@ -118,7 +118,7 @@ func TestWithGridResolutionNonPositiveValueShouldBeDiscarded(t *testing.T) {
 
 		icon, err := identicon.New(
 			identifier,
-			identicon.WithGridResolution(resolution),
+			identicon.WithResolution(resolution),
 			identicon.WithHasher(hasher),
 		)
 
@@ -132,7 +132,7 @@ func TestWithGridResolutionNonPositiveValueShouldBeDiscarded(t *testing.T) {
 
 		icon, err := identicon.New(
 			identifier,
-			identicon.WithGridResolution(resolution),
+			identicon.WithResolution(resolution),
 			identicon.WithHasher(hasher),
 		)
 
