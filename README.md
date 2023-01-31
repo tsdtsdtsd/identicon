@@ -15,8 +15,9 @@ This Go library helps to generate deterministic [Identicons][identicon-wiki] fro
 
 ---
 
-⚠️ I'm working on a complete rewrite for v1.0 ⚠️  
-It will definitely break the API and also the internal hashing algorithm, so identicons generated after v0.3.2 will look different. 
+⚠️ **v1.0 brings BREAKING CHANGES** ⚠️  
+
+The API changed and also the internal hashing algorithm, so identicons generated after v0.3.2 will look different.  
 
 ---
 
