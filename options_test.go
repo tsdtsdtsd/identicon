@@ -22,6 +22,19 @@ func TestWithBGColorOption(t *testing.T) {
 	assert.Equal(t, red, got)
 }
 
+func TestWithFGColorOption(t *testing.T) {
+
+	red := color.NRGBA{255, 0, 0, 255}
+	optionFunc := identicon.WithFGColor(red)
+	icon, err := identicon.New("id")
+
+	optionFunc(icon)
+	got := icon.Options().FGColor
+
+	assert.NoError(t, err)
+	assert.Equal(t, red, got)
+}
+
 func TestWithImageSizeOption(t *testing.T) {
 
 	size := 200

@@ -8,10 +8,11 @@ import (
 
 // Options define customizable settings
 type Options struct {
-	BGColor        color.Color
 	GridResolution int
 	ImageSize      int
 	Hasher         hash.Hash
+	BGColor        color.Color
+	FGColor        color.Color
 }
 
 // Option changes a single option
@@ -31,6 +32,13 @@ func DefaultOptions() *Options {
 func WithBGColor(c color.Color) Option {
 	return func(i *Identicon) {
 		i.options.BGColor = c
+	}
+}
+
+// WithFGColor returns an option that sets the identicon's background color to given color.
+func WithFGColor(c color.Color) Option {
+	return func(i *Identicon) {
+		i.options.FGColor = c
 	}
 }
 
