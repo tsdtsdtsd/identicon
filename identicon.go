@@ -118,13 +118,17 @@ func (ic *Identicon) computeMatrix() {
 
 func (ic *Identicon) draw() {
 
-	// Last 3 bytes of hash are the RGB values
-	// TODO: too random? custom palette?
-	fgColor := color.NRGBA{
-		R: uint8(ic.hash[1]),
-		G: uint8(ic.hash[2]),
-		B: uint8(ic.hash[3]),
-		A: uint8(255),
+	fgColor := ic.options.FGColor
+
+	if fgColor == nil {
+		// Last 3 bytes of hash are the RGB values
+		// TODO: too random? custom palette?
+		fgColor = color.NRGBA{
+			R: uint8(ic.hash[1]),
+			G: uint8(ic.hash[2]),
+			B: uint8(ic.hash[3]),
+			A: uint8(255),
+		}
 	}
 
 	// Background fill

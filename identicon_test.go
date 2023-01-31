@@ -72,6 +72,24 @@ func TestWithBGColorShouldSetOption(t *testing.T) {
 	assert.Equal(t, defaultOptions, icon.Options())
 }
 
+func TestWithFGColorShouldSetOption(t *testing.T) {
+
+	red := color.NRGBA{255, 0, 0, 255}
+	defaultOptions := identicon.DefaultOptions()
+	defaultOptions.FGColor = red
+	defaultOptions.Hasher = hasher
+
+	icon, err := identicon.New(
+		identifier,
+		identicon.WithFGColor(red),
+		identicon.WithHasher(hasher),
+	)
+
+	assert.NotNil(t, icon)
+	assert.NoError(t, err)
+	assert.Equal(t, defaultOptions, icon.Options())
+}
+
 func TestWithGridResolutionShouldSetOption(t *testing.T) {
 
 	resolution := 8
