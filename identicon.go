@@ -123,11 +123,10 @@ func (ic *Identicon) draw() {
 
 	// Last 3 bytes of hash are the RGB values
 	// TODO: too random? custom palette?
-	hashLength := len(ic.hash)
 	fgColor := color.NRGBA{
-		R: uint8(ic.hash[hashLength-1]),
-		G: uint8(ic.hash[hashLength-2]),
-		B: uint8(ic.hash[hashLength-3]),
+		R: uint8(ic.hash[1]),
+		G: uint8(ic.hash[2]),
+		B: uint8(ic.hash[3]),
 		A: uint8(255),
 	}
 
