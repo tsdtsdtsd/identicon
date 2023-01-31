@@ -16,7 +16,7 @@ This Go library helps to generate deterministic [Identicons][identicon-wiki] fro
 ---
 
 ⚠️ I'm working on a complete rewrite for v1.0 ⚠️  
-It will definitely break the API and most probably also the internal hashing algorithm, so identicons generated after 1.0 will look different than before. 
+It will definitely break the API and also the internal hashing algorithm, so identicons generated after v0.3.2 will look different. 
 
 ---
 
@@ -36,9 +36,10 @@ red := color.RGBA{255, 0, 0, 255}
 icon, err := identicon.New(
     "gary@example.com", 
     // optional:
-    identicon.WithGridResolution(7), // default: 5
-    identicon.WithImageSize(200),    // default: 100
-    identicon.WithBGColor(red),      // default: light gray R:240 G:240 B:240 A:255 (#f0f0f0)
+    identicon.WithGridResolution(7),  // default: 5
+    identicon.WithImageSize(200),     // default: 100
+    identicon.WithBGColor(red),       // default: light gray R:240 G:240 B:240 A:255 (#f0f0f0)
+    identicon.WithHasher(sha1.New()), // default fnv128
 )
 if err != nil {
     log.Fatal(err)
