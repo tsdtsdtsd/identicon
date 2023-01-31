@@ -68,20 +68,17 @@ func (ic *Identicon) computeHash() {
 	mandatoryByteAmount := tileAmount / 2
 	resolutionIsEven := tileAmount%2 == 0
 
-	// fmt.Println(tileAmount, mandatoryByteAmount)
 	if !resolutionIsEven {
 		mandatoryByteAmount += ic.options.GridResolution
 	}
-	// fmt.Println(tileAmount, mandatoryByteAmount)
+
 	sum := hashSum(ic.options.Hasher, []byte(ic.Identifier))
 
-	// TODO: need better idea for workaround - this ends up in strange and repeated patterns if gridres is >8
 	for len(sum) < mandatoryByteAmount {
 		addSum := hashSum(ic.options.Hasher, sum)
 		sum = append(addSum, sum...)
 	}
 
-	// fmt.Println(len(sum), mandatoryByteAmount)
 	ic.hash = sum
 }
 
@@ -247,7 +244,6 @@ func tileValue(colNum int, rowNum int, hash []byte, resolution int, secondHalf b
 		realColNum = (resolution - colNum - 1)
 	}
 	pos := (realColNum * resolution) + rowNum
-	// TODO: remove
-	// fmt.Println(colNum, rowNum, pos, secondHalf)
+
 	return (int(hash[pos]) & 2) > 0
 }
