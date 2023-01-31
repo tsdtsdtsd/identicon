@@ -12,7 +12,7 @@ import (
 // stride is the pixel byte stride (in bytes) between vertically adjacent pixels.
 const stride int = 4
 
-// Identicon defines an identicon
+// Identicon defines an identicon.
 type Identicon struct {
 	Identifier string
 	options    *Options
@@ -170,12 +170,12 @@ func (ic *Identicon) Options() *Options {
 	return ic.options
 }
 
-// Matrix
+// Matrix returns the identicons "tile map".
 func (ic *Identicon) Matrix() [][]bool {
 	return ic.matrix
 }
 
-// HashString returns the hexadacimal representation of the hash as string
+// HashString returns the hexadacimal representation of the hash as string.
 func (ic *Identicon) HashString() string {
 	return hex.EncodeToString(ic.hash)
 }
