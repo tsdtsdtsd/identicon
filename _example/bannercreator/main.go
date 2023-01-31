@@ -8,7 +8,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/tsdtsdtsd/identicon/v1"
+	"github.com/tsdtsdtsd/identicon"
 )
 
 var genIDs = []string{
