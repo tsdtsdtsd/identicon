@@ -2,6 +2,7 @@ package identicon_test
 
 import (
 	"fmt"
+	"hash/fnv"
 	"image/color"
 	"image/png"
 	"log"
@@ -12,7 +13,10 @@ import (
 	"github.com/tsdtsdtsd/identicon"
 )
 
-var identifier = "my-test-identifier"
+var (
+	identifier = "my-test-identifier"
+	hasher     = fnv.New128()
+)
 
 func TestIdentifierMustNotBeEmpty(t *testing.T) {
 
@@ -29,7 +33,7 @@ func TestIdentifierMustNotBeEmpty(t *testing.T) {
 
 func TestBasicIdenticon(t *testing.T) {
 
-	icon, err := identicon.New(identifier)
+	icon, err := identicon.New(identifier, identicon.WithHasher(hasher))
 
 	t.Run("icon is not nil", func(t *testing.T) {
 		assert.NotNil(t, icon)
@@ -41,6 +45,7 @@ func TestBasicIdenticon(t *testing.T) {
 
 	t.Run("icon has default options", func(t *testing.T) {
 		defaultOptions := identicon.DefaultOptions()
+		defaultOptions.Hasher = hasher
 		assert.Equal(t, defaultOptions, icon.Options())
 	})
 
@@ -54,10 +59,12 @@ func TestWithBGColorShouldSetOption(t *testing.T) {
 	red := color.NRGBA{255, 0, 0, 255}
 	defaultOptions := identicon.DefaultOptions()
 	defaultOptions.BGColor = red
+	defaultOptions.Hasher = hasher
 
 	icon, err := identicon.New(
 		identifier,
 		identicon.WithBGColor(red),
+		identicon.WithHasher(hasher),
 	)
 
 	assert.NotNil(t, icon)
@@ -70,10 +77,12 @@ func TestWithGridResolutionShouldSetOption(t *testing.T) {
 	resolution := 8
 	defaultOptions := identicon.DefaultOptions()
 	defaultOptions.GridResolution = resolution
+	defaultOptions.Hasher = hasher
 
 	icon, err := identicon.New(
 		identifier,
 		identicon.WithGridResolution(resolution),
+		identicon.WithHasher(hasher),
 	)
 
 	assert.NotNil(t, icon)
@@ -84,6 +93,7 @@ func TestWithGridResolutionShouldSetOption(t *testing.T) {
 func TestWithGridResolutionNonPositiveValueShouldBeDiscarded(t *testing.T) {
 
 	defaultOptions := identicon.DefaultOptions()
+	defaultOptions.Hasher = hasher
 
 	t.Run("zero given", func(t *testing.T) {
 		resolution := 0
@@ -91,6 +101,7 @@ func TestWithGridResolutionNonPositiveValueShouldBeDiscarded(t *testing.T) {
 		icon, err := identicon.New(
 			identifier,
 			identicon.WithGridResolution(resolution),
+			identicon.WithHasher(hasher),
 		)
 
 		assert.NotNil(t, icon)
@@ -104,6 +115,7 @@ func TestWithGridResolutionNonPositiveValueShouldBeDiscarded(t *testing.T) {
 		icon, err := identicon.New(
 			identifier,
 			identicon.WithGridResolution(resolution),
+			identicon.WithHasher(hasher),
 		)
 
 		assert.NotNil(t, icon)
@@ -117,10 +129,12 @@ func TestWithImageSizeShouldSetOption(t *testing.T) {
 	size := 60
 	defaultOptions := identicon.DefaultOptions()
 	defaultOptions.ImageSize = size
+	defaultOptions.Hasher = hasher
 
 	icon, err := identicon.New(
 		identifier,
 		identicon.WithImageSize(size),
+		identicon.WithHasher(hasher),
 	)
 
 	assert.NotNil(t, icon)
@@ -131,6 +145,7 @@ func TestWithImageSizeShouldSetOption(t *testing.T) {
 func TestWithImageSizeNonPositiveValueShouldBeDiscarded(t *testing.T) {
 
 	defaultOptions := identicon.DefaultOptions()
+	defaultOptions.Hasher = hasher
 
 	t.Run("zero given", func(t *testing.T) {
 		size := 0
@@ -138,6 +153,7 @@ func TestWithImageSizeNonPositiveValueShouldBeDiscarded(t *testing.T) {
 		icon, err := identicon.New(
 			identifier,
 			identicon.WithImageSize(size),
+			identicon.WithHasher(hasher),
 		)
 
 		assert.NotNil(t, icon)
@@ -151,6 +167,7 @@ func TestWithImageSizeNonPositiveValueShouldBeDiscarded(t *testing.T) {
 		icon, err := identicon.New(
 			identifier,
 			identicon.WithImageSize(size),
+			identicon.WithHasher(hasher),
 		)
 
 		assert.NotNil(t, icon)
@@ -166,15 +183,15 @@ func TestHashHasTheExpectedValue(t *testing.T) {
 	}{
 		{
 			identifier:   "my-test",
-			expectedHash: "6f14f2bed3ec4e0d3db3c7f62c2d9aef6f14f2bed3ec4e0d3db3c7f62c2d9aef",
+			expectedHash: "e25338e76f1ce3c59da92abae869587cd065bb972f4ff78c11f12d9a75f9806c",
 		},
 		{
 			identifier:   "0",
-			expectedHash: "cfcd208495d565ef66e7dff9f98764dacfcd208495d565ef66e7dff9f98764da",
+			expectedHash: "35fbae7d37875a800d8614f09817791dd228cb69101a8caf78912b704e4a144f",
 		},
 		{
 			identifier:   "my-second-test-is-a-lot-larger-than-the-first-test-i-swear",
-			expectedHash: "6eb92c6a1ff075525502a0b84470debe6eb92c6a1ff075525502a0b84470debe",
+			expectedHash: "6fa315b3bd5a894a8215f10eca7146c90774be2442906c4540e22e04ee99b649",
 		},
 	}
 	for _, test := range testSet {
@@ -196,31 +213,31 @@ func TestMatrixIsCorrect(t *testing.T) {
 		{
 			identifier: "my-test",
 			expectedMatrix: [][]bool{
-				{true, false, true, true, true},
-				{false, true, false, false, true},
-				{true, true, false, false, true},
-				{false, true, false, false, true},
-				{true, false, true, true, true},
+				{true, true, false, true, true},
+				{false, true, false, false, false},
+				{true, true, false, false, false},
+				{false, true, false, false, false},
+				{true, true, false, true, true},
 			},
 		},
 		{
 			identifier: "0",
 			expectedMatrix: [][]bool{
-				{true, false, false, false, false},
-				{false, false, true, true, true},
-				{true, false, false, true, false},
-				{false, false, true, true, true},
-				{true, false, false, false, false},
+				{false, true, true, false, true},
+				{true, true, false, false, true},
+				{false, false, false, true, false},
+				{true, true, false, false, true},
+				{false, true, true, false, true},
 			},
 		},
 		{
 			identifier: "my-second-test-is-a-lot-larger-than-the-first-test-i-swear",
 			expectedMatrix: [][]bool{
-				{true, false, false, true, true},
-				{false, false, true, false, true},
-				{false, false, false, false, true},
-				{false, false, true, false, true},
-				{true, false, false, true, true},
+				{true, true, false, true, false},
+				{true, false, true, true, false},
+				{false, true, true, false, true},
+				{true, false, true, true, false},
+				{true, true, false, true, false},
 			},
 		},
 	}

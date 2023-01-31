@@ -1,6 +1,8 @@
 package identicon_test
 
 import (
+	"crypto/sha1"
+	"hash/fnv"
 	"image/color"
 	"testing"
 
@@ -16,6 +18,7 @@ func TestDefaultOptions(t *testing.T) {
 		BGColor:        color.NRGBA{240, 240, 240, 255},
 		GridResolution: 5,
 		ImageSize:      100,
+		Hasher:         fnv.New128(),
 	}
 	got := identicon.DefaultOptions()
 
@@ -46,4 +49,17 @@ func TestWithImageSizeOption(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Equal(t, size, got)
+}
+
+func TestWithHasher(t *testing.T) {
+
+	hasher := sha1.New()
+	optionFunc := identicon.WithHasher(hasher)
+	icon, err := identicon.New("id")
+
+	optionFunc(icon)
+	got := icon.Options().Hasher
+
+	assert.NoError(t, err)
+	assert.Equal(t, hasher, got)
 }

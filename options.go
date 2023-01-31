@@ -1,12 +1,17 @@
 package identicon
 
-import "image/color"
+import (
+	"hash"
+	"hash/fnv"
+	"image/color"
+)
 
 // Options define customizable settings
 type Options struct {
 	BGColor        color.Color
 	GridResolution int
 	ImageSize      int
+	Hasher         hash.Hash
 }
 
 // Option changes a single option
@@ -18,6 +23,7 @@ func DefaultOptions() *Options {
 		BGColor:        color.NRGBA{240, 240, 240, 255},
 		GridResolution: 5,
 		ImageSize:      100,
+		Hasher:         fnv.New128(),
 	}
 }
 
@@ -49,5 +55,17 @@ func WithImageSize(size int) Option {
 		}
 
 		i.options.ImageSize = size
+	}
+}
+
+// WithHasher returns an option that sets the identicon's hash generator.
+// The option will be discarded silently if nil given.
+func WithHasher(hasher hash.Hash) Option {
+	return func(i *Identicon) {
+		if hasher == nil {
+			return
+		}
+
+		i.options.Hasher = hasher
 	}
 }
