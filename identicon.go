@@ -9,7 +9,7 @@ import (
 	"image/draw"
 )
 
-// stride is the pixel stride (in bytes) between vertically adjacent pixels.
+// stride is the pixel byte stride (in bytes) between vertically adjacent pixels.
 const stride int = 4
 
 // Identicon defines an identicon
@@ -19,9 +19,7 @@ type Identicon struct {
 	matrix     [][]bool // first dimension is columns, second is rows
 	hash       []byte
 	bounds     image.Rectangle
-	// pixels holds the image's pixels, in R, G, B, A order. The pixel at
-	// (x, y) starts at pixels[(y-Rect.Min.Y)*stride*imgWidth + (x-Rect.Min.X)*stride].
-	pixels []uint8
+	pixels     []uint8
 }
 
 // New returns the identicon for given identifier.
@@ -107,7 +105,7 @@ func (ic *Identicon) computeMatrix() {
 		// First half
 		matrix[col] = createColumn(col, ic.hash, ic.options.GridResolution, false)
 
-		// Replicate to second half
+		// Mirror to second half
 		colMax := len(matrix) - 1
 		mirroredColNum := colMax - col
 		matrix[mirroredColNum] = createColumn(mirroredColNum, ic.hash, ic.options.GridResolution, true)
