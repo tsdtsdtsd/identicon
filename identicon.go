@@ -77,7 +77,8 @@ func (ic *Identicon) computeHash() {
 
 	// TODO: need better idea for workaround - this ends up in strange and repeated patterns if gridres is >8
 	for len(sum) < mandatoryByteAmount {
-		sum = append(sum, sum...)
+		addSum := hashSum(ic.options.Hasher, sum)
+		sum = append(addSum, sum...)
 	}
 
 	// fmt.Println(len(sum), mandatoryByteAmount)
