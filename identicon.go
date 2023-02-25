@@ -4,9 +4,6 @@ import (
 	"encoding/hex"
 	"errors"
 	"hash"
-	"image"
-	"image/color"
-	"image/draw"
 )
 
 // stride is the pixel byte stride (in bytes) between vertically adjacent pixels.
@@ -18,8 +15,7 @@ type Identicon struct {
 	options    *Options
 	matrix     [][]bool // first dimension is columns, second is rows
 	hash       []byte
-	bounds     image.Rectangle
-	pixels     []uint8
+	image      *Image
 }
 
 // New returns the identicon for given identifier.
@@ -37,10 +33,8 @@ func New(identifier string, opts ...Option) (*Identicon, error) {
 	}
 
 	ic.applyOptions(opts...)
-	ic.initImage()
 	ic.computeHash()
 	ic.computeMatrix()
-	ic.draw()
 
 	return ic, nil
 }
@@ -49,20 +43,6 @@ func (ic *Identicon) applyOptions(opts ...Option) {
 	for _, opt := range opts {
 		opt(ic)
 	}
-}
-
-func (ic *Identicon) initImage() {
-
-	// TODO: for cropping strategy,
-	// bounds and pixels need to be calculated based on
-	// tile amount, tile size, grid width
-
-	ic.bounds = image.Rectangle{
-		Min: image.Point{0, 0},
-		Max: image.Point{ic.options.ImageSize, ic.options.ImageSize},
-	}
-
-	ic.pixels = make([]uint8, 4*ic.bounds.Dx()*ic.bounds.Dy())
 }
 
 func (ic *Identicon) computeHash() {
@@ -119,52 +99,6 @@ func (ic *Identicon) computeMatrix() {
 	ic.matrix = matrix
 }
 
-func (ic *Identicon) draw() {
-
-	fgColor := ic.options.FGColor
-
-	if fgColor == nil {
-		// Last 3 bytes of hash are the RGB values
-		// TODO: too random? custom palette?
-		fgColor = color.NRGBA{
-			R: uint8(ic.hash[1]),
-			G: uint8(ic.hash[2]),
-			B: uint8(ic.hash[3]),
-			A: uint8(255),
-		}
-	}
-
-	// Background fill
-	draw.Draw(ic, ic.Bounds(), &image.Uniform{ic.options.BGColor}, image.Point{}, draw.Src)
-
-	// Iterate tiles and draw
-	for colOffset, col := range ic.matrix {
-		for rowOffset, tileIsSet := range col {
-			if tileIsSet {
-				ic.drawTile(colOffset, rowOffset, fgColor)
-			}
-		}
-	}
-}
-
-func (ic *Identicon) drawTile(colOffset, rowOffset int, fgColor color.Color) {
-
-	colStart := (colOffset * (ic.options.ImageSize / ic.options.Resolution))
-	colEnd := colStart + (ic.options.ImageSize / ic.options.Resolution)
-
-	rowStart := (rowOffset * (ic.options.ImageSize / ic.options.Resolution))
-	rowEnd := rowStart + (ic.options.ImageSize / ic.options.Resolution)
-
-	draw.Draw(
-		ic,
-		image.Rect(colStart, rowStart, colEnd, rowEnd),
-		&image.Uniform{fgColor},
-		image.Point{},
-		draw.Src,
-	)
-
-}
-
 // Options returns the identicons options.
 func (ic *Identicon) Options() *Options {
 	return ic.options
@@ -180,68 +114,18 @@ func (ic *Identicon) HashString() string {
 	return hex.EncodeToString(ic.hash)
 }
 
+// Image generates and returns the image.
+func (ic *Identicon) Image() *Image {
+	if ic.image == nil {
+		ic.image = newImage(ic.options, ic.hash, ic.matrix)
+	}
+	return ic.image
+}
+
 func hashSum(hasher hash.Hash, in []byte) []byte {
 	hasher.Reset()
 	hasher.Write(in)
 	return hasher.Sum(nil)
-}
-
-// At returns the color of the pixel at (x, y).
-// At(Bounds().Min.X, Bounds().Min.Y) returns the upper-left pixel of the grid.
-// At(Bounds().Max.X-1, Bounds().Max.Y-1) returns the lower-right one.
-func (ic *Identicon) At(x, y int) color.Color {
-	return ic.NRGBAAt(x, y)
-}
-
-// NRGBAAt returns the color of the pixel at (x, y) as color.NRGBA.
-func (ic *Identicon) NRGBAAt(x, y int) color.NRGBA {
-	if !(image.Point{x, y}.In(ic.bounds)) {
-		return color.NRGBA{}
-	}
-	i := ic.pixelOffset(x, y)
-	return color.NRGBA{ic.pixels[i+0], ic.pixels[i+1], ic.pixels[i+2], ic.pixels[i+3]}
-}
-
-// Bounds returns the domain for which At can return non-zero color.
-func (ic *Identicon) Bounds() image.Rectangle {
-	return ic.bounds
-}
-
-// ColorModel returns the Image's color model.
-func (ic *Identicon) ColorModel() color.Model {
-	return color.NRGBAModel
-}
-
-// PixOffset returns the index of the first element of pixels that corresponds to
-// the pixel at (x, y).
-func (ic *Identicon) pixelOffset(x, y int) int {
-	return (y-ic.bounds.Min.Y)*stride*ic.options.ImageSize + (x-ic.bounds.Min.X)*4
-}
-
-// Set stores given color at position (x, y).
-func (ic *Identicon) Set(x, y int, c color.Color) {
-	if !(image.Point{x, y}.In(ic.bounds)) {
-		return
-	}
-
-	i := ic.pixelOffset(x, y)
-	cNRGBA := ic.ColorModel().Convert(c).(color.NRGBA)
-
-	ic.pixels[i+0] = cNRGBA.R
-	ic.pixels[i+1] = cNRGBA.G
-	ic.pixels[i+2] = cNRGBA.B
-	ic.pixels[i+3] = cNRGBA.A
-}
-
-func createColumn(colNum int, hash []byte, resolution int, secondHalf bool) []bool {
-
-	col := make([]bool, resolution)
-
-	for rowNum := 0; rowNum < resolution; rowNum++ {
-		col[rowNum] = tileValue(colNum, rowNum, hash, resolution, secondHalf)
-	}
-
-	return col
 }
 
 func tileValue(colNum int, rowNum int, hash []byte, resolution int, secondHalf bool) bool {

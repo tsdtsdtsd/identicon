@@ -278,7 +278,7 @@ func ExampleNew() {
 		log.Fatal(err)
 	}
 
-	err = png.Encode(file, icon)
+	err = png.Encode(file, icon.Image())
 	if err != nil {
 		log.Fatal(err)
 	}

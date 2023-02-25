@@ -66,7 +66,7 @@ func main() {
 		y1 := y0 + size
 
 		// Draw identicon on banner
-		draw.Draw(banner, image.Rect(x0, y0, x1, y1), ic, image.Point{}, draw.Src)
+		draw.Draw(banner, image.Rect(x0, y0, x1, y1), ic.Image(), image.Point{}, draw.Src)
 	}
 
 	// Encode and write banner to file

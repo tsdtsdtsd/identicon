@@ -51,7 +51,7 @@ if err != nil {
 
 3. Create an image:
 
-   `Identicon` implements Go's `image.Image`, so you can use the result directly to encode it as an image file:
+   `Image()` returns an `*Image` which implements Go's `image.Image` interface, so you can use the result directly to encode it as an image file:
 
 ```go
 file, err := os.Create("identicon-gary.png")
@@ -59,7 +59,7 @@ if err != nil {
     log.Fatal(err)
 }
 
-err = png.Encode(file, icon)
+err = png.Encode(file, icon.Image())
 if err != nil {
     log.Fatal(err)
 }
@@ -67,7 +67,7 @@ if err != nil {
 file.Close()
 ```
 
-Identicon also implements Go's `draw.Image`, you can use it to change the output further:
+`Image` also implements Go's `draw.Image` interface, you can use it to change the output further:
 
 ```go
     // TODO: example 
